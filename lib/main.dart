@@ -15,6 +15,9 @@ class MyApp extends StatelessWidget {
         drawer: const Drawer(),
         appBar: AppBar(
           title: const Text('Adotar'),
+          actions: [
+            IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
+          ],
         ),
         body: Column(children: [
           Card(
