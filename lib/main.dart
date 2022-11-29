@@ -8,22 +8,19 @@ Future<void> main() async {
   runApp(MyApp());
 }
 
-class UserSignUp extends StatefulWidget {
+class UserSignUp extends StatelessWidget {
   final FirebaseFirestore database;
 
   const UserSignUp({super.key, required this.database});
 
   @override
-  State<UserSignUp> createState() => _UserSignUpState();
-}
-
-class _UserSignUpState extends State<UserSignUp> {
-  @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Center(
-        child: MaterialButton(
+        child:
+        TextButton(
             child: const Text('Click me!'),
+            style: ButtonStyle(foregroundColor: MaterialStateProperty.all<Color>(Colors.white)),
             onPressed: () {
               var user = User(
                   "certainly-is-id",
@@ -37,7 +34,7 @@ class _UserSignUpState extends State<UserSignUp> {
                   "certainly-is-a-user-name",
                   "certainly-is-a-password",
                   "certainly-is-a-photo");
-              widget.database
+              database
                   .collection("users")
                   .add(user.toMap())
                   .then((DocumentReference doc) {
@@ -47,15 +44,11 @@ class _UserSignUpState extends State<UserSignUp> {
   }
 }
 
-// class
-
 class MyApp extends StatelessWidget {
   MyApp({super.key});
 
   final Future<FirebaseApp> _firebaseApp = Firebase.initializeApp();
   late FirebaseFirestore _database;
-
-// late FirebaseFirestore _database;
 
 // This widget is the root of your application.
   @override
@@ -72,6 +65,7 @@ class MyApp extends StatelessWidget {
               return Text('You have an error! ${snapshot.error.toString()}');
             } else if (snapshot.hasData) {
               _database = FirebaseFirestore.instance;
+              // return Text('Ok');
               return UserSignUp(database: _database);
             } else {
               return const Center(
