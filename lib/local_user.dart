@@ -1,4 +1,4 @@
-class User {
+class LocalUser {
   late String uid;
   late String fullName;
   late int age;
@@ -11,7 +11,7 @@ class User {
   late String password;
   late String? photo;
 
-  User(this.uid, this.fullName, this.age, this.email, this.state, this.country,
+  LocalUser(this.uid, this.fullName, this.age, this.email, this.state, this.country,
       this.address, this.phoneNumber, this.userName, this.password, this.photo);
 
   Map<String, dynamic> toMap() {

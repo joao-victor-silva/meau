@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:meau/user.dart';
+import 'package:meau/local_user.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,19 +11,20 @@ Future<void> main() async {
 
 class UserSignUp extends StatelessWidget {
   final FirebaseFirestore database;
+  final FirebaseAuth auth;
 
-  const UserSignUp({super.key, required this.database});
+  const UserSignUp({super.key, required this.database, required this.auth});
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Center(
-        child:
-        TextButton(
-            child: const Text('Click me!'),
-            style: ButtonStyle(foregroundColor: MaterialStateProperty.all<Color>(Colors.white)),
+        child: TextButton(
+            style: ButtonStyle(
+                foregroundColor:
+                    MaterialStateProperty.all<Color>(Colors.white)),
             onPressed: () {
-              var user = User(
+              var user = LocalUser(
                   "certainly-is-id",
                   "certainly-is-a-full-name",
                   21,
@@ -34,13 +36,23 @@ class UserSignUp extends StatelessWidget {
                   "certainly-is-a-user-name",
                   "certainly-is-a-password",
                   "certainly-is-a-photo");
-              database
-                  .collection("users")
-                  .add(user.toMap())
-                  .then((DocumentReference doc) {
-                print('DocumentSnapshot added with ID: ${doc.id}');
+              auth
+                  .createUserWithEmailAndPassword(
+                      email: user.email, password: user.password)
+                  .then(
+                      (credential) => {
+                            database
+                                .collection("users")
+                                .add(user.toMap())
+                                .then((DocumentReference doc) {
+                              print(
+                                  'DocumentSnapshot added with ID: ${doc.id}');
+                            })
+                          }, onError: (error) {
+                print('Something went wrong! ${error.toString()}');
               });
-            }));
+            },
+            child: const Text('Click me!')));
   }
 }
 
@@ -49,6 +61,7 @@ class MyApp extends StatelessWidget {
 
   final Future<FirebaseApp> _firebaseApp = Firebase.initializeApp();
   late FirebaseFirestore _database;
+  late FirebaseAuth _auth;
 
 // This widget is the root of your application.
   @override
@@ -65,8 +78,9 @@ class MyApp extends StatelessWidget {
               return Text('You have an error! ${snapshot.error.toString()}');
             } else if (snapshot.hasData) {
               _database = FirebaseFirestore.instance;
+              _auth = FirebaseAuth.instance;
               // return Text('Ok');
-              return UserSignUp(database: _database);
+              return UserSignUp(database: _database, auth: _auth);
             } else {
               return const Center(
                 child: CircularProgressIndicator(),
