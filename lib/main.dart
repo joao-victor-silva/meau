@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:meau/local_user.dart';
+import 'package:meau/pages/local_user_signup.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,22 +72,23 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: FutureBuilder(
-          future: _firebaseApp,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Text('You have an error! ${snapshot.error.toString()}');
-            } else if (snapshot.hasData) {
-              _database = FirebaseFirestore.instance;
-              _auth = FirebaseAuth.instance;
-              // return Text('Ok');
-              return UserSignUp(database: _database, auth: _auth);
-            } else {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-          }),
+      home: LocalUserSignUpPage()
+      // FutureBuilder(
+      //     future: _firebaseApp,
+      //     builder: (context, snapshot) {
+      //       if (snapshot.hasError) {
+      //         return Text('You have an error! ${snapshot.error.toString()}');
+      //       } else if (snapshot.hasData) {
+      //         _database = FirebaseFirestore.instance;
+      //         _auth = FirebaseAuth.instance;
+      //         // return Text('Ok');
+      //         return UserSignUp(database: _database, auth: _auth);
+      //       } else {
+      //         return const Center(
+      //           child: CircularProgressIndicator(),
+      //         );
+      //       }
+      //     }),
     );
   }
 }
