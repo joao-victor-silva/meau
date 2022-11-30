@@ -3,27 +3,23 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:meau/local_user.dart';
 
-class LocalUserSignUpPage extends StatefulWidget {
+class LocalUserSignInPage extends StatefulWidget {
   final FirebaseFirestore database;
   final FirebaseAuth auth;
 
-  const LocalUserSignUpPage(
+  const LocalUserSignInPage(
       {super.key, required this.database, required this.auth});
 
   @override
-  State<LocalUserSignUpPage> createState() => LocalUserSignUpPageState();
+  State<LocalUserSignInPage> createState() => LocalUserSignInPageState();
 }
 
-class LocalUserSignUpPageState extends State<LocalUserSignUpPage> {
-  final name = TextEditingController();
-  final age = TextEditingController();
+class LocalUserSignInPageState extends State<LocalUserSignInPage> {
   final email = TextEditingController();
   final password = TextEditingController();
 
   @override
   void dispose() {
-    name.dispose();
-    age.dispose();
     email.dispose();
     password.dispose();
     super.dispose();
@@ -33,7 +29,7 @@ class LocalUserSignUpPageState extends State<LocalUserSignUpPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Cadastro Pessoal"),
+          title: const Text("Login"),
         ),
         drawer: const Padding(
             padding: EdgeInsets.fromLTRB(16.0, 16.0, 0.0, 16.0),
@@ -43,28 +39,7 @@ class LocalUserSignUpPageState extends State<LocalUserSignUpPage> {
           child: ListView(
             children: [
               const SizedBox(
-                height: 28.0,
-              ),
-              Container(
-                child: const Text('INFORMAÇÕES PESSOAIS'),
-                alignment: Alignment.topLeft,
-              ),
-              const SizedBox(
-                height: 32.0,
-              ),
-              TextField(
-                controller: name,
-                decoration: const InputDecoration(
-                  labelText: 'Nome completo',
-                  labelStyle: TextStyle(fontSize: 14.0),
-                ),
-              ),
-              TextField(
-                controller: age,
-                decoration: const InputDecoration(
-                  labelText: 'Idade',
-                  labelStyle: TextStyle(fontSize: 14.0),
-                ),
+                height: 64.0,
               ),
               TextField(
                 controller: email,
@@ -81,25 +56,40 @@ class LocalUserSignUpPageState extends State<LocalUserSignUpPage> {
                 ),
               ),
               const SizedBox(
-                height: 32.0,
+                height: 52.0,
               ),
               TextButton(
                 onPressed: () {
-                  final user = LocalUser("id", name.text, age.text, email.text,
-                      "", "", "", "", "", password.text, "");
                   widget.auth
-                      .createUserWithEmailAndPassword(
-                          email: user.email, password: user.password)
-                      .then((credential) => {
-                            widget.database
-                                .collection("users")
-                                .doc(user.email)
-                                .set(user.toMap())
-                                .onError((error, _) {
-                              print(
-                                  'Something went wrong! ${error.toString()}');
-                            })
-                          });
+                      .signInWithEmailAndPassword(
+                          email: email.text, password: password.text)
+                      .then(
+                          (credential) => {
+                                widget.database
+                                    .collection("users")
+                                    .doc(email.text)
+                                    .get()
+                                    .then((DocumentSnapshot doc) {
+                                  final data =
+                                      doc.data() as Map<String, dynamic>;
+                                  final localUser = LocalUser(
+                                      "",
+                                      data["fullName"],
+                                      data["age"],
+                                      data["email"],
+                                      "",
+                                      "",
+                                      "",
+                                      "",
+                                      "",
+                                      "",
+                                      "");
+                                  print(
+                                      'User: ${localUser.toMap().toString()}');
+                                })
+                              }, onError: (error) {
+                    print('Something went wrong! ${error.toString()}');
+                  });
                 },
                 style: ButtonStyle(
                     foregroundColor: MaterialStateProperty.all<Color>(

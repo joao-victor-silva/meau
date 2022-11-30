@@ -1,7 +1,7 @@
 class LocalUser {
   late String uid;
   late String fullName;
-  late int age;
+  late String age;
   late String email;
   late String state;
   late String country;
