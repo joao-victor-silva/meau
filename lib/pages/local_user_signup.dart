@@ -46,8 +46,8 @@ class LocalUserSignUpPageState extends State<LocalUserSignUpPage> {
                 height: 28.0,
               ),
               Container(
-                child: const Text('INFORMAÇÕES PESSOAIS'),
                 alignment: Alignment.topLeft,
+                child: const Text('INFORMAÇÕES PESSOAIS'),
               ),
               const SizedBox(
                 height: 32.0,
