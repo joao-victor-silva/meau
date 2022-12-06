@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:meau/pages/introduction_page.dart';
 
 enum AnimalType {
   cat,
@@ -19,11 +20,11 @@ enum AnimalSize {
 }
 
 class AnimalSignUpPage extends StatefulWidget {
-  final FirebaseFirestore database;
   final FirebaseAuth auth;
+  final FirebaseFirestore database;
 
   const AnimalSignUpPage(
-      {super.key, required this.database, required this.auth});
+      {super.key, required this.auth, required this.database});
 
   @override
   State<AnimalSignUpPage> createState() => AnimalSignUpPageState();
@@ -141,12 +142,18 @@ class AnimalSignUpPageState extends State<AnimalSignUpPage> {
                     "name": name.text,
                     "specie": specie.toString(),
                     "gender": gender.toString(),
+                    "owner": widget.auth.currentUser?.uid,
                   };
                   widget.database
                       .collection("animals")
                       .add(animal)
-                      .then((DocumentReference doc) {
+                      .then((DocumentReference doc) async {
                     print('Animal ${name.text} saved on database');
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => IntroductionPage(auth: widget.auth, database: widget.database)));
+                    await widget.auth.signOut();
                   }).onError((error, stackTrace) {
                     print('Something went wrong! ${error.toString()}');
                   });

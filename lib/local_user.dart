@@ -11,8 +11,15 @@ class LocalUser {
   late String password;
   late String? photo;
 
-  LocalUser(this.uid, this.fullName, this.age, this.email, this.state, this.country,
+  LocalUser(this.uid, this.fullName, this.age, this.email, this.state,
+      this.country,
       this.address, this.phoneNumber, this.userName, this.password, this.photo);
+
+  LocalUser.fromMap(Map<String, dynamic> map) {
+    LocalUser(
+        map['uid'], map['fullName'], map['age'], map['email'], map['state'],
+        map['country'], map['address'], map['phoneNumber'], map['userName'], map['password'], map['photo']);
+  }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{

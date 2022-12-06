@@ -26,6 +26,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
+      // home: const SplashPage();
       home: FutureBuilder(
           future: _firebaseApp,
           builder: (context, snapshot) {
@@ -34,12 +35,13 @@ class MyApp extends StatelessWidget {
             } else if (snapshot.hasData) {
               _database = FirebaseFirestore.instance;
               _auth = FirebaseAuth.instance;
-              return LocalUserSignUpPage(
-                database: _database,
-                auth: _auth,
-              );
+              // return LocalUserSignUpPage(
+              //   database: _database,
+              //   auth: _auth,
+              // );
               // return LocalUserSignInPage(database: _database, auth: _auth);
               // return AnimalSignUpPage(database: _database, auth: _auth);
+              return SplashPage(auth: _auth, database: _database);
             } else {
               return const Center(
                 child: CircularProgressIndicator(),
@@ -58,7 +60,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   @override
   Widget build(BuildContext context) {
     return const Scaffold();
