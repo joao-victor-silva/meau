@@ -35,9 +35,6 @@ class SplashPageState extends State<SplashPage> {
           ),
         ),
       ),
-      // body: Center(
-      //   child: Text('Splash screen'),
-      // ),
     );
   }
 
