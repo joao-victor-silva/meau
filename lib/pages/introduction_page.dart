@@ -1,7 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:meau/pages/animal_signup.dart';
+import 'package:meau/pages/local_user_signin.dart';
+import 'package:meau/pages/unauthenticated_page.dart';
 
 class IntroductionPage extends StatelessWidget {
-  const IntroductionPage({super.key});
+  final FirebaseFirestore database;
+  final FirebaseAuth auth;
+
+  const IntroductionPage({super.key, required this.auth, required this.database});
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +53,16 @@ class IntroductionPage extends StatelessWidget {
               height: 48,
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                auth.authStateChanges().listen((User? user) {
+                  if (user == null) {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => UnauthenticatedPage(auth: auth, database: database)));
+                  }
+                });
+              },
               style: const ButtonStyle(
                   backgroundColor: MaterialStatePropertyAll(
                       Color.fromARGB(255, 255, 211, 88)),
@@ -64,7 +81,16 @@ class IntroductionPage extends StatelessWidget {
               height: 12,
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                auth.authStateChanges().listen((User? user) {
+                  if (user == null) {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => UnauthenticatedPage(auth: auth, database: database)));
+                  }
+                });
+              },
               style: const ButtonStyle(
                   backgroundColor: MaterialStatePropertyAll(
                       Color.fromARGB(255, 255, 211, 88)),
@@ -83,7 +109,21 @@ class IntroductionPage extends StatelessWidget {
               height: 12,
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                auth.authStateChanges().listen((User? user) {
+                  if (user == null) {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => UnauthenticatedPage(auth: auth, database: database)));
+                  } else {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AnimalSignUpPage(auth: auth, database: database)));
+                  }
+                });
+              },
               style: const ButtonStyle(
                   backgroundColor: MaterialStatePropertyAll(
                       Color.fromARGB(255, 255, 211, 88)),
@@ -102,7 +142,16 @@ class IntroductionPage extends StatelessWidget {
               height: 44,
             ),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                auth.authStateChanges().listen((User? user) {
+                  if (user == null) {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => LocalUserSignInPage(auth: auth, database: database)));
+                  }
+                });
+              },
               style: const ButtonStyle(
                   foregroundColor: MaterialStatePropertyAll(
                       Color.fromARGB(255, 136, 201, 191)),
@@ -127,4 +176,3 @@ class IntroductionPage extends StatelessWidget {
       ),
     );
   }
-}

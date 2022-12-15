@@ -1,5 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:meau/pages/animal_signup.dart';
+import 'package:meau/pages/local_user_signin.dart';
+import 'package:meau/pages/local_user_signup.dart';
 import 'package:meau/pages/splash_page.dart';
 
 Future<void> main() async {
@@ -11,6 +16,8 @@ class MyApp extends StatelessWidget {
   MyApp({super.key});
 
   final Future<FirebaseApp> _firebaseApp = Firebase.initializeApp();
+  late FirebaseFirestore _database;
+  late FirebaseAuth _auth;
 
   @override
   Widget build(BuildContext context) {
@@ -19,22 +26,28 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const SplashPage(),
-      // home: FutureBuilder(
-      //   future: _firebaseApp,
-      //   builder: (context, snapshot) {
-      //     if (snapshot.hasError) {
-      //       print('You have an error! ${snapshot.error.toString()}');
-      //       return const Text('Something went wrong!');
-      //     } else if (snapshot.hasData) {
-      //       return const MyHomePage(title: 'Flutter Demo Home Page');
-      //     } else {
-      //       return const Center(
-      //         child: CircularProgressIndicator(),
-      //       );
-      //     }
-      //   },
-      // )
+      // home: const SplashPage();
+      home: FutureBuilder(
+          future: _firebaseApp,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Text('You have an error! ${snapshot.error.toString()}');
+            } else if (snapshot.hasData) {
+              _database = FirebaseFirestore.instance;
+              _auth = FirebaseAuth.instance;
+              // return LocalUserSignUpPage(
+              //   database: _database,
+              //   auth: _auth,
+              // );
+              // return LocalUserSignInPage(database: _database, auth: _auth);
+              // return AnimalSignUpPage(database: _database, auth: _auth);
+              return SplashPage(auth: _auth, database: _database);
+            } else {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          }),
     );
   }
 }
@@ -47,7 +60,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   @override
   Widget build(BuildContext context) {
     return const Scaffold();
