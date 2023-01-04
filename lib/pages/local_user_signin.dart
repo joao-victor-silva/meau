@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meau/local_user.dart';
@@ -9,9 +10,10 @@ import 'package:meau/pages/introduction_page.dart';
 class LocalUserSignInPage extends StatefulWidget {
   final FirebaseFirestore database;
   final FirebaseAuth auth;
+  final FirebaseStorage storage;
 
   const LocalUserSignInPage(
-      {super.key, required this.database, required this.auth});
+      {super.key, required this.database, required this.auth, required this.storage});
 
   @override
   State<LocalUserSignInPage> createState() => LocalUserSignInPageState();
@@ -47,7 +49,7 @@ class LocalUserSignInPageState extends State<LocalUserSignInPage> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => AnimalSignUpPage(
-                              database: widget.database, auth: widget.auth)))
+                              database: widget.database, auth: widget.auth, storage: widget.storage,)))
                 }, onError: (error) {
       print('Something went wrong! ${error.toString()}');
     });

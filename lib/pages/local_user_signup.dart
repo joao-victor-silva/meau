@@ -1,16 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meau/local_user.dart';
 import 'package:meau/pages/introduction_page.dart';
+import 'package:image_picker/image_picker.dart';
 
 class LocalUserSignUpPage extends StatefulWidget {
   final FirebaseFirestore database;
   final FirebaseAuth auth;
+  final FirebaseStorage storage;
 
   const LocalUserSignUpPage(
-      {super.key, required this.database, required this.auth});
+      {super.key,
+      required this.database,
+      required this.auth,
+      required this.storage});
 
   @override
   State<LocalUserSignUpPage> createState() => LocalUserSignUpPageState();
@@ -21,6 +27,8 @@ class LocalUserSignUpPageState extends State<LocalUserSignUpPage> {
   final age = TextEditingController();
   final email = TextEditingController();
   final password = TextEditingController();
+  final _picker = ImagePicker();
+  late XFile photo;
 
   @override
   void dispose() {
@@ -31,27 +39,59 @@ class LocalUserSignUpPageState extends State<LocalUserSignUpPage> {
     super.dispose();
   }
 
-  void _signup() {
-    final user = LocalUser("id", name.text, age.text, email.text, "", "", "",
-        "", "", password.text, "");
+  Future<void> _pickImage(ImageSource source) async {
+    final imagePicked = await _picker.pickImage(source: source);
+
+    if (imagePicked != null) {
+      setState(() {
+        photo = imagePicked;
+      });
+    }
+  }
+
+  Future<String> _uploadPhoto(String? userId) async {
+    if (photo == null) {
+      return "";
+    }
+
+    final storageRef = widget.storage.ref();
+    final userPhotoRef = storageRef.child("users/$userId/profilePhoto.jpg");
+    try {
+      userPhotoRef.putData(await photo.readAsBytes());
+      return userPhotoRef.getDownloadURL();
+    } on FirebaseException catch (e) {
+      print("Couldn't upload user profile photo: ${e.message}");
+    }
+    return "";
+  }
+
+  void _signup() async {
+    var user = LocalUser("id", name.text, age.text, email.text, "", "", "", "",
+        "", password.text, "");
     widget.auth
         .createUserWithEmailAndPassword(
             email: user.email, password: user.password)
-        .then((credential) => {
-              widget.database
-                  .collection("users")
-                  .doc(credential.user?.uid)
-                  .set(user.toMap())
-                  .then((value) {
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => IntroductionPage(
-                            auth: widget.auth, database: widget.database)));
-              }).onError((error, _) {
-                print('Something went wrong! ${error.toString()}');
-              })
-            });
+        .then((credential) async {
+      if (photo != null) {
+        user.photo = await _uploadPhoto(credential.user?.uid);
+      }
+      widget.database
+          .collection("users")
+          .doc(credential.user?.uid)
+          .set(user.toMap())
+          .then((value) {
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+                builder: (context) => IntroductionPage(
+                      auth: widget.auth,
+                      database: widget.database,
+                      storage: widget.storage,
+                    )));
+      }).onError((error, _) {
+        print('Something went wrong! ${error.toString()}');
+      });
+    });
   }
 
   @override
@@ -126,6 +166,24 @@ class LocalUserSignUpPageState extends State<LocalUserSignUpPage> {
               ),
               const SizedBox(
                 height: 32.0,
+              ),
+              TextButton(
+                onPressed: () => _pickImage(ImageSource.camera),
+                style: ButtonStyle(
+                    foregroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 67, 67, 67)),
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 207, 233, 229))),
+                child: const Text('CAMERA', style: TextStyle(fontSize: 12.0)),
+              ),
+              TextButton(
+                onPressed: () => _pickImage(ImageSource.gallery),
+                style: ButtonStyle(
+                    foregroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 67, 67, 67)),
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 207, 233, 229))),
+                child: const Text('GALERIA', style: TextStyle(fontSize: 12.0)),
               ),
               TextButton(
                 onPressed: () => _signup(),

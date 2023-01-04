@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:meau/pages/introduction_page.dart';
+import 'package:uuid/uuid.dart';
 
 enum AnimalType {
   cat,
@@ -22,9 +25,10 @@ enum AnimalSize {
 class AnimalSignUpPage extends StatefulWidget {
   final FirebaseAuth auth;
   final FirebaseFirestore database;
+  final FirebaseStorage storage;
 
   const AnimalSignUpPage(
-      {super.key, required this.auth, required this.database});
+      {super.key, required this.auth, required this.database, required this.storage});
 
   @override
   State<AnimalSignUpPage> createState() => AnimalSignUpPageState();
@@ -35,11 +39,42 @@ class AnimalSignUpPageState extends State<AnimalSignUpPage> {
   AnimalType? specie = AnimalType.dog;
   AnimalGender? gender = AnimalGender.female;
   AnimalSize? size = AnimalSize.small;
+  final _picker = ImagePicker();
+  late XFile photo;
 
   @override
   void dispose() {
     name.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final imagePicked = await _picker.pickImage(source: source);
+
+    if (imagePicked != null) {
+      setState(() {
+        photo = imagePicked;
+      });
+    }
+  }
+
+  Future<String> _uploadPhoto(String id) async {
+    if (photo == null) {
+      print("No photo");
+      return "";
+    }
+
+    final storageRef = widget.storage.ref();
+    final animalPhotoRef = storageRef.child("animals/$id.jpg");
+    try {
+      animalPhotoRef.putData(await photo.readAsBytes());
+      String url = await animalPhotoRef.getDownloadURL();
+      print('image url: $url');
+      return url;
+    } on FirebaseException catch (e) {
+      print("Couldn't upload animal photo: ${e.message}");
+      return "";
+    }
   }
 
   @override
@@ -137,22 +172,48 @@ class AnimalSignUpPageState extends State<AnimalSignUpPage> {
               //   height: 32.0,
               // ),
               TextButton(
-                onPressed: () {
-                  final animal = <String, dynamic>{
+                onPressed: () => _pickImage(ImageSource.camera),
+                style: ButtonStyle(
+                    foregroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 67, 67, 67)),
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 207, 233, 229))),
+                child: const Text('CAMERA', style: TextStyle(fontSize: 12.0)),
+              ),
+              TextButton(
+                onPressed: () => _pickImage(ImageSource.gallery),
+                style: ButtonStyle(
+                    foregroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 67, 67, 67)),
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 207, 233, 229))),
+                child: const Text('GALERIA', style: TextStyle(fontSize: 12.0)),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final uuid = Uuid();
+                  final id = uuid.v4();
+                  Map<String, dynamic> animal = {
+                    "id": id,
                     "name": name.text,
                     "specie": specie.toString(),
                     "gender": gender.toString(),
+                    "needs": "Precisa de muita atenção pois é muito baguneeiro e gosta de bricar.",
                     "owner": widget.auth.currentUser?.uid,
                   };
+                  if (photo != null) {
+                    animal['photoUrl'] = await _uploadPhoto(id);
+                  }
                   widget.database
                       .collection("animals")
-                      .add(animal)
-                      .then((DocumentReference doc) async {
+                      .doc(id)
+                      .set(animal)
+                      .then((value) async {
                     print('Animal ${name.text} saved on database');
                     Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => IntroductionPage(auth: widget.auth, database: widget.database)));
+                            builder: (context) => IntroductionPage(auth: widget.auth, database: widget.database, storage: widget.storage,)));
                     await widget.auth.signOut();
                   }).onError((error, stackTrace) {
                     print('Something went wrong! ${error.toString()}');

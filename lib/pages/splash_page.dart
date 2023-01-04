@@ -1,13 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:meau/pages/introduction_page.dart';
 
 class SplashPage extends StatefulWidget {
   final FirebaseFirestore database;
   final FirebaseAuth auth;
+  final FirebaseStorage storage;
 
-  const SplashPage({super.key, required this.auth, required this.database});
+  const SplashPage({super.key, required this.auth, required this.database, required this.storage});
 
   @override
   SplashPageState createState() => SplashPageState();
@@ -48,7 +50,7 @@ class SplashPageState extends State<SplashPage> {
       Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => IntroductionPage(auth: widget.auth, database: widget.database)));
+              builder: (context) => IntroductionPage(auth: widget.auth, database: widget.database, storage: widget.storage)));
     });
   }
 }

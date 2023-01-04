@@ -1,15 +1,24 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:meau/pages/animal_signup.dart';
+import 'package:meau/pages/animals.dart';
 import 'package:meau/pages/local_user_signin.dart';
 import 'package:meau/pages/unauthenticated_page.dart';
 
 class IntroductionPage extends StatelessWidget {
   final FirebaseFirestore database;
   final FirebaseAuth auth;
+  final FirebaseStorage storage;
 
-  const IntroductionPage({super.key, required this.auth, required this.database});
+  const IntroductionPage(
+      {super.key,
+      required this.auth,
+      required this.database,
+      required this.storage});
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +68,10 @@ class IntroductionPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => UnauthenticatedPage(auth: auth, database: database)));
+                            builder: (context) => UnauthenticatedPage(
+                                auth: auth,
+                                database: database,
+                                storage: storage)));
                   }
                 });
               },
@@ -67,7 +79,7 @@ class IntroductionPage extends StatelessWidget {
                   backgroundColor: MaterialStatePropertyAll(
                       Color.fromARGB(255, 255, 211, 88)),
                   foregroundColor:
-                  MaterialStatePropertyAll(Color.fromARGB(255, 67, 67, 67)),
+                      MaterialStatePropertyAll(Color.fromARGB(255, 67, 67, 67)),
                   fixedSize: MaterialStatePropertyAll(Size(232, 40)),
                   textStyle: MaterialStatePropertyAll(
                     TextStyle(
@@ -87,7 +99,10 @@ class IntroductionPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => UnauthenticatedPage(auth: auth, database: database)));
+                            builder: (context) => UnauthenticatedPage(
+                                auth: auth,
+                                database: database,
+                                storage: storage)));
                   }
                 });
               },
@@ -95,7 +110,7 @@ class IntroductionPage extends StatelessWidget {
                   backgroundColor: MaterialStatePropertyAll(
                       Color.fromARGB(255, 255, 211, 88)),
                   foregroundColor:
-                  MaterialStatePropertyAll(Color.fromARGB(255, 67, 67, 67)),
+                      MaterialStatePropertyAll(Color.fromARGB(255, 67, 67, 67)),
                   fixedSize: MaterialStatePropertyAll(Size(232, 40)),
                   textStyle: MaterialStatePropertyAll(
                     TextStyle(
@@ -115,12 +130,19 @@ class IntroductionPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => UnauthenticatedPage(auth: auth, database: database)));
+                            builder: (context) => UnauthenticatedPage(
+                                auth: auth,
+                                database: database,
+                                storage: storage)));
                   } else {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => AnimalSignUpPage(auth: auth, database: database)));
+                            builder: (context) => AnimalSignUpPage(
+                                  auth: auth,
+                                  database: database,
+                                  storage: storage,
+                                )));
                   }
                 });
               },
@@ -128,7 +150,7 @@ class IntroductionPage extends StatelessWidget {
                   backgroundColor: MaterialStatePropertyAll(
                       Color.fromARGB(255, 255, 211, 88)),
                   foregroundColor:
-                  MaterialStatePropertyAll(Color.fromARGB(255, 67, 67, 67)),
+                      MaterialStatePropertyAll(Color.fromARGB(255, 67, 67, 67)),
                   fixedSize: MaterialStatePropertyAll(Size(232, 40)),
                   textStyle: MaterialStatePropertyAll(
                     TextStyle(
@@ -137,6 +159,75 @@ class IntroductionPage extends StatelessWidget {
                     ),
                   )),
               child: const Text('CADASTRAR ANIMAL'),
+            ),
+            TextButton(
+              onPressed: () async {
+                // var animals = <dynamic>[];
+                // var result = await database.collection("animals").get();
+                var result = await database
+                    .collection("animals")
+                    .where("owner", isEqualTo: "AeMEAn3iVzVW6FpDPUXOXHPWdwr1")
+                    .get();
+                var animals = result.docs.map((e) => e.data()).toList();
+
+                // print("animals: ${data.length}");
+                Timer(
+                    Duration.zero,
+                    () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Animals(
+                                  title: "Meus animais",
+                                  animals: animals,
+                                  storage: storage,
+                                ))));
+              },
+              style: const ButtonStyle(
+                  backgroundColor: MaterialStatePropertyAll(
+                      Color.fromARGB(255, 255, 211, 88)),
+                  foregroundColor:
+                      MaterialStatePropertyAll(Color.fromARGB(255, 67, 67, 67)),
+                  fixedSize: MaterialStatePropertyAll(Size(232, 40)),
+                  textStyle: MaterialStatePropertyAll(
+                    TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'Roboto',
+                    ),
+                  )),
+              child: const Text('MEUS ANIMAIS'),
+            ),
+            TextButton(
+              onPressed: () async {
+                // var animals = <dynamic>[];
+                var result = await database.collection("animals").get();
+                // var result = await database.collection("animals").where("owner", isEqualTo: "AeMEAn3iVzVW6FpDPUXOXHPWdwr1").get();
+                var animals = result.docs.map((e) => e.data()).toList();
+
+                // print("animals: ${data.length}");
+                Timer(
+                    Duration.zero,
+                    () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Animals(
+                                  title: "Animais para adoção",
+                                  animals: animals,
+                                  storage: storage,
+                                ))));
+              },
+              style: const ButtonStyle(
+                  backgroundColor: MaterialStatePropertyAll(
+                      Color.fromARGB(255, 255, 211, 88)),
+                  foregroundColor:
+                      MaterialStatePropertyAll(Color.fromARGB(255, 67, 67, 67)),
+                  fixedSize: MaterialStatePropertyAll(Size(232, 40)),
+                  textStyle: MaterialStatePropertyAll(
+                    TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'Roboto',
+                    ),
+                  )),
+              child: const Text('ANIMAIS PARA ADOÇÃO'),
             ),
             const SizedBox(
               height: 44,
@@ -148,7 +239,10 @@ class IntroductionPage extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => LocalUserSignInPage(auth: auth, database: database)));
+                            builder: (context) => UnauthenticatedPage(
+                                auth: auth,
+                                database: database,
+                                storage: storage)));
                   }
                 });
               },
@@ -176,3 +270,4 @@ class IntroductionPage extends StatelessWidget {
       ),
     );
   }
+}

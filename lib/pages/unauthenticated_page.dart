@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meau/pages/local_user_signin.dart';
@@ -8,9 +9,10 @@ import 'package:meau/pages/local_user_signup.dart';
 class UnauthenticatedPage extends StatelessWidget {
   final FirebaseFirestore database;
   final FirebaseAuth auth;
+  final FirebaseStorage storage;
 
   const UnauthenticatedPage(
-      {super.key, required this.auth, required this.database});
+      {super.key, required this.auth, required this.database, required this.storage});
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +76,7 @@ class UnauthenticatedPage extends StatelessWidget {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => LocalUserSignUpPage(auth: auth, database: database)));
+                        builder: (context) => LocalUserSignUpPage(auth: auth, database: database, storage: storage)));
               },
               style: const ButtonStyle(
                   backgroundColor: MaterialStatePropertyAll(
@@ -98,7 +100,7 @@ class UnauthenticatedPage extends StatelessWidget {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => LocalUserSignInPage(auth: auth, database: database)));
+                        builder: (context) => LocalUserSignInPage(auth: auth, database: database, storage: storage,)));
               },
               style: const ButtonStyle(
                   backgroundColor: MaterialStatePropertyAll(
