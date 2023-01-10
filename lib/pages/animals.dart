@@ -2,7 +2,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:meau/pages/animal_card.dart';
 
-class Animals extends StatelessWidget {
+class Animals extends StatefulWidget {
   final String title;
   final List<Map<String, dynamic>> animals;
   final FirebaseStorage storage;
@@ -13,18 +13,24 @@ class Animals extends StatelessWidget {
       required this.animals,
       required this.storage});
 
+  @override
+  State<Animals> createState() => _AnimalsState();
+}
+
+class _AnimalsState extends State<Animals> {
   List<Widget> getAnimalsCards() {
     List<Widget> cards = <AnimalCard>[];
-    for (var i = 0; i < animals.length; i++) {
+    for (var i = 0; i < widget.animals.length; i++) {
       var photoUrl =
           "https://petepop.ig.com.br/wp-content/uploads/2021/06/reproduc%CC%A7a%CC%83o-instagram.jpg";
       cards.add(AnimalCard(
-          id: animals[i]["id"] ?? "",
-          name: animals[i]['name'] ?? "",
-          photoUrl: animals[i]['photoUrl'] ?? photoUrl,
-          specie: animals[i]['specie'] ?? "",
-          gender: animals[i]['gender'] ?? "",
-          size: animals[i]['size'] ?? "")
+          id: widget.animals[i]["id"] ?? "",
+          name: widget.animals[i]['name'] ?? "",
+          photoUrl: widget.animals[i]['photoUrl'] ?? photoUrl,
+          specie: widget.animals[i]['specie'] ?? "",
+          gender: widget.animals[i]['gender'] ?? "",
+          size: widget.animals[i]['size'] ?? "",
+          ownerId: widget.animals[i]['owner'] ?? "")
       );
     }
     return cards;
@@ -36,7 +42,7 @@ class Animals extends StatelessWidget {
     return Scaffold(
         drawer: const Drawer(),
         appBar: AppBar(
-          title: Text(this.title),
+          title: Text(this.widget.title),
           actions: [
             IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
           ],

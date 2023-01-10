@@ -9,6 +9,7 @@ class AnimalCard extends StatelessWidget {
   final String specie;
   final String gender;
   final String size;
+  final String ownerId;
 
   const AnimalCard({
     super.key,
@@ -18,6 +19,7 @@ class AnimalCard extends StatelessWidget {
     required this.specie,
     required this.gender,
     required this.size,
+    required this.ownerId,
   });
 
   @override
@@ -40,6 +42,7 @@ class AnimalCard extends StatelessWidget {
                         needs: "",
                         size: size,
                         gender: gender,
+                        ownerId: ownerId,
                       )));
         },
         child: Card(

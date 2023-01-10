@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class AnimalDetails extends StatelessWidget {
-  const AnimalDetails({super.key, required this.photoUrl, required this.name, required this.temperamento, required this.needs, required this.size, required this.gender, required this.id});
+  const AnimalDetails({super.key, required this.photoUrl, required this.name, required this.temperamento, required this.needs, required this.size, required this.gender, required this.id, required this.ownerId});
 
   final String photoUrl;
   final String id;
@@ -11,6 +14,7 @@ class AnimalDetails extends StatelessWidget {
   final String needs;
   final String size;
   final String gender;
+  final String ownerId;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +38,7 @@ class AnimalDetails extends StatelessWidget {
           getTextWidget('GENERO', gender),
           getTextWidget('TEMPERAMENTO', temperamento),
           getTextWidget('o que $name precisa'.toUpperCase(), needs),
+          getAdoptButton()
         ],
       ),
     );
@@ -60,6 +65,40 @@ class AnimalDetails extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget getAdoptButton() {
+    if (FirebaseAuth.instance.currentUser?.uid == ownerId)
+      return Container();
+
+    return TextButton(
+      onPressed: () {
+        var database = FirebaseFirestore.instance;
+        Map<String, dynamic> notification = {
+          "target": ownerId,
+          "animalName": name,
+          "sourceName": FirebaseAuth.instance.currentUser?.email,
+          "source": FirebaseAuth.instance.currentUser?.uid,
+        };
+        database
+            .collection("notifications").add(notification).then((value) => {
+              print('notification sent')
+        });
+      },
+      style: const ButtonStyle(
+          backgroundColor: MaterialStatePropertyAll(
+              Color.fromARGB(255, 255, 211, 88)),
+          foregroundColor:
+          MaterialStatePropertyAll(Color.fromARGB(255, 67, 67, 67)),
+          fixedSize: MaterialStatePropertyAll(Size(232, 40)),
+          textStyle: MaterialStatePropertyAll(
+            TextStyle(
+              fontSize: 12,
+              fontFamily: 'Roboto',
+            ),
+          )),
+      child: const Text('ADOTAR'),
     );
   }
 }

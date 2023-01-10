@@ -1,26 +1,59 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:meau/pages/animal_details.dart';
 import 'package:meau/pages/animal_signup.dart';
+import 'package:meau/pages/introduction_page.dart';
 import 'package:meau/pages/local_user_signin.dart';
 import 'package:meau/pages/local_user_signup.dart';
 import 'package:meau/pages/splash_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  final fcmToken = await FirebaseMessaging.instance.getToken();
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   final Future<FirebaseApp> _firebaseApp = Firebase.initializeApp();
+
   late FirebaseFirestore _database;
+
   late FirebaseAuth _auth;
+
   late FirebaseStorage _storage;
+
+  late StreamSubscription<User?> user;
+
+  void initState() {
+    super.initState();
+    user = FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user == null) {
+        print('User is signed out');
+      } else {
+        print('User is signed in');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    user.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +93,9 @@ class MyApp extends StatelessWidget {
               );
             }
           }),
+      routes: {
+        IntroductionPage.id: (context) => IntroductionPage(auth: _auth, database: _database, storage: _storage)
+      },
     );
   }
 }
