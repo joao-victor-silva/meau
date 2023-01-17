@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -41,6 +42,18 @@ class AnimalSignUpPageState extends State<AnimalSignUpPage> {
   AnimalSize? size = AnimalSize.small;
   final _picker = ImagePicker();
   late XFile photo;
+  String? userNotificationToken = null;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    FirebaseMessaging.instance.getToken().then((token) => {
+      setState(() {
+        userNotificationToken = token;
+      })
+    });
+  }
 
   @override
   void dispose() {
@@ -200,6 +213,7 @@ class AnimalSignUpPageState extends State<AnimalSignUpPage> {
                     "gender": gender.toString(),
                     "needs": "Precisa de muita atenção pois é muito baguneeiro e gosta de bricar.",
                     "owner": widget.auth.currentUser?.uid,
+                    "ownerToken": userNotificationToken?? ""
                   };
                   if (photo != null) {
                     animal['photoUrl'] = await _uploadPhoto(id);
