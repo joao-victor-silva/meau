@@ -30,7 +30,8 @@ class _AnimalsState extends State<Animals> {
           specie: widget.animals[i]['specie'] ?? "",
           gender: widget.animals[i]['gender'] ?? "",
           size: widget.animals[i]['size'] ?? "",
-          ownerId: widget.animals[i]['owner'] ?? "")
+          ownerId: widget.animals[i]['owner'] ?? "",
+          ownerToken: widget.animals[i]['ownerToken'] ?? "")
       );
     }
     return cards;
