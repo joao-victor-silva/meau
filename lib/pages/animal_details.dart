@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class AnimalDetails extends StatelessWidget {
-  const AnimalDetails({super.key, required this.photoUrl, required this.name, required this.temperamento, required this.needs, required this.size, required this.gender, required this.id, required this.ownerId});
+  const AnimalDetails({super.key, required this.photoUrl, required this.name, required this.temperamento, required this.needs, required this.size, required this.gender, required this.id, required this.ownerId, required this.ownerToken});
 
   final String photoUrl;
   final String id;
@@ -15,6 +16,7 @@ class AnimalDetails extends StatelessWidget {
   final String size;
   final String gender;
   final String ownerId;
+  final String ownerToken;
 
   @override
   Widget build(BuildContext context) {
@@ -75,12 +77,19 @@ class AnimalDetails extends StatelessWidget {
     return TextButton(
       onPressed: () {
         var database = FirebaseFirestore.instance;
-        Map<String, dynamic> notification = {
+        var messaging = FirebaseMessaging.instance;
+
+        Map<String, String> notification = {
           "target": ownerId,
           "animalName": name,
-          "sourceName": FirebaseAuth.instance.currentUser?.email,
-          "source": FirebaseAuth.instance.currentUser?.uid,
+          "sourceName": FirebaseAuth.instance.currentUser!.email!,
+          "source": FirebaseAuth.instance.currentUser!.uid!,
         };
+
+        messaging.getToken().then((token) => {
+          messaging.sendMessage(messageType: "", data: notification).then((value) => {})
+        });
+
         database
             .collection("notifications").add(notification).then((value) => {
               print('notification sent')
