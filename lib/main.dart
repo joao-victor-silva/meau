@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -13,10 +12,30 @@ import 'package:meau/pages/local_user_signin.dart';
 import 'package:meau/pages/local_user_signup.dart';
 import 'package:meau/pages/splash_page.dart';
 
+Future<void> _firebaseMessageBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print('Handling background message: ${message.messageId}');
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  final fcmToken = await FirebaseMessaging.instance.getToken();
+  FirebaseMessaging.onBackgroundMessage((message) => _firebaseMessageBackgroundHandler(message));
+
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+
+  NotificationSettings settings = await _firebaseMessaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+
+  print('User permissions: ${settings.authorizationStatus}');
+
   runApp(MyApp());
 }
 
@@ -40,6 +59,8 @@ class _MyAppState extends State<MyApp> {
 
   void initState() {
     super.initState();
+
+    // Auth
     user = FirebaseAuth.instance.authStateChanges().listen((user) {
       if (user == null) {
         print('User is signed out');
@@ -47,6 +68,30 @@ class _MyAppState extends State<MyApp> {
         print('User is signed in');
       }
     });
+
+    // Notifications
+    FirebaseMessaging.instance.getToken().then((value) => {
+      print("FCM Token is: $value")
+    });
+
+    // FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    //   if (message.notification != null) {
+    //     setState(() {
+    //       notificationTitle = message.notification!.title;
+    //       notificationBody = message.notification!.body;
+    //     });
+    //   }
+    // });
+    //
+    // FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    //   print('Opened message: ${message.data}');
+    //   if (message.notification != null) {
+    //     setState(() {
+    //       notificationTitle = message.notification!.title;
+    //       notificationBody = message.notification!.body;
+    //     });
+    //   }
+    // });
   }
 
   @override
@@ -86,7 +131,8 @@ class _MyAppState extends State<MyApp> {
               // );
               // return LocalUserSignInPage(database: _database, auth: _auth);
               // return AnimalSignUpPage(database: _database, auth: _auth);
-              return SplashPage(auth: _auth, database: _database, storage: _storage);
+              return SplashPage(
+                  auth: _auth, database: _database, storage: _storage);
             } else {
               return const Center(
                 child: CircularProgressIndicator(),
@@ -94,7 +140,8 @@ class _MyAppState extends State<MyApp> {
             }
           }),
       routes: {
-        IntroductionPage.id: (context) => IntroductionPage(auth: _auth, database: _database, storage: _storage)
+        IntroductionPage.id: (context) => IntroductionPage(
+            auth: _auth, database: _database, storage: _storage)
       },
     );
   }
