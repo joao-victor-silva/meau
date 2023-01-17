@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:meau/pages/animal_card.dart';
@@ -13,15 +14,34 @@ class Notifications extends StatefulWidget {
 }
 
 class _NotificationsState extends State<Notifications> {
-  List<Widget> getNotifications() {
-    List<Widget> cards = <Card>[];
-    for (var i = 0; i < widget.notifications.length; i++) {
-      var data = widget.notifications[i];
-      cards.add(Card(
-          child: Text(
-              'O usuário(a) ${data["sourceName"]} está interessado no animal ${data["animalName"]}')));
-    }
-    return cards;
+  String? notificationTitle, notificationBody;
+
+  void initState() {
+    super.initState();
+
+    FirebaseMessaging.instance.getToken().then((value) => {
+      print("FCM Token is: $value")
+    });
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.notification != null) {
+        setState(() {
+          notificationTitle = message.notification!.title;
+          notificationBody = message.notification!.body;
+        });
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('Opened message: ${message.data}');
+      print('Message: ${message.toMap().toString()}');
+      if (message.notification != null) {
+        setState(() {
+          notificationTitle = message.notification!.title;
+          notificationBody = message.notification!.body;
+        });
+      }
+    });
   }
 
   @override
@@ -30,12 +50,56 @@ class _NotificationsState extends State<Notifications> {
     return Scaffold(
         drawer: const Drawer(),
         appBar: AppBar(
-          title: Text('NOTIFICAÇÕES'),
+          title: Text('Notificações'),
           actions: [
             IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
           ],
         ),
-        body:
-            SingleChildScrollView(child: Column(children: getNotifications())));
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "${notificationTitle != null ? notificationTitle : "Notification Title Goes Here"}",
+                style: TextStyle(
+                    fontSize: 28,
+                    color: Color.fromARGB(255, 79, 79, 79),
+                    fontWeight: FontWeight.bold),
+              ),
+              Text(
+                "${notificationBody != null ? notificationBody : "Notification Body Goes Here"}",
+                style: TextStyle(
+                    fontSize: 16,
+                    color: Color.fromARGB(255, 79, 79, 79),
+                    fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+    );
+  }
+
+  Widget acceptButton() {
+    // if (notificationTitle != null) {
+    //   return TextButton(onPressed: () {
+    //     var db = FirebaseFirestore.instance;
+    //     db.
+    //   }, child: Text('Aceitar'));
+    // }
+
+    return Container();
+  }
+
+  Widget declineButton() {
+    if (notificationTitle != null) {
+      return TextButton(onPressed: () {
+        setState(() {
+          notificationTitle = null;
+          notificationBody = null;
+        });
+      }, child: Text('Recusar'));
+    }
+
+    return Container();
   }
 }
