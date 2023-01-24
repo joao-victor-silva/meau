@@ -7,12 +7,9 @@ import 'package:meau/pages/local_user_signin.dart';
 import 'package:meau/pages/local_user_signup.dart';
 
 class UnauthenticatedPage extends StatelessWidget {
-  final FirebaseFirestore database;
-  final FirebaseAuth auth;
-  final FirebaseStorage storage;
+  static String id = 'unauththenticated';
 
-  const UnauthenticatedPage(
-      {super.key, required this.auth, required this.database, required this.storage});
+  UnauthenticatedPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -73,10 +70,7 @@ class UnauthenticatedPage extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => LocalUserSignUpPage(auth: auth, database: database, storage: storage)));
+                Navigator.pushNamed(context, SignUp.id);
               },
               style: const ButtonStyle(
                   backgroundColor: MaterialStatePropertyAll(
@@ -97,10 +91,7 @@ class UnauthenticatedPage extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => LocalUserSignInPage(auth: auth, database: database, storage: storage,)));
+                Navigator.pushNamed(context, SignIn.id);
               },
               style: const ButtonStyle(
                   backgroundColor: MaterialStatePropertyAll(

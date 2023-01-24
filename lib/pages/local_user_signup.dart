@@ -1,39 +1,82 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:meau/local_user.dart';
+import 'package:meau/pages/Drawer.dart';
+import 'package:meau/pages/all_animals_page.dart';
 import 'package:meau/pages/introduction_page.dart';
 import 'package:image_picker/image_picker.dart';
 
-class LocalUserSignUpPage extends StatefulWidget {
-  final FirebaseFirestore database;
-  final FirebaseAuth auth;
-  final FirebaseStorage storage;
+import '../model/user.dart';
 
-  const LocalUserSignUpPage(
-      {super.key,
-      required this.database,
-      required this.auth,
-      required this.storage});
+class SignUp extends StatefulWidget {
+  static String id = 'signup';
+
+  SignUp({super.key});
 
   @override
-  State<LocalUserSignUpPage> createState() => LocalUserSignUpPageState();
+  State<SignUp> createState() => SignUpState();
 }
 
-class LocalUserSignUpPageState extends State<LocalUserSignUpPage> {
+class SignUpState extends State<SignUp> {
   final name = TextEditingController();
-  final age = TextEditingController();
   final email = TextEditingController();
   final password = TextEditingController();
   final _picker = ImagePicker();
   late XFile photo;
 
+  String? token = "";
+
+  void getToken() async {
+    await FirebaseMessaging.instance.getToken().then((value) {
+      setState(() {
+        token = value;
+        print("FCM Token: $token");
+      });
+    });
+  }
+
+  late firebase_auth.FirebaseAuth _auth;
+  late FirebaseFirestore _database;
+  late FirebaseStorage _storage;
+
+  void initAuth() {
+    var auth = firebase_auth.FirebaseAuth.instance;
+    setState(() {
+      _auth = auth;
+    });
+    print('Auth initialized');
+  }
+
+  void initDatabase() {
+    var db = FirebaseFirestore.instance;
+    setState(() {
+      _database = db;
+    });
+    print('Database initialized');
+  }
+
+  void initStorage() {
+    var storage = FirebaseStorage.instance;
+    setState(() {
+      _storage = storage;
+    });
+    print('Storage initialized');
+  }
+
+  @override
+  void initState() {
+    initAuth();
+    initDatabase();
+    initStorage();
+    getToken();
+  }
+
   @override
   void dispose() {
     name.dispose();
-    age.dispose();
     email.dispose();
     password.dispose();
     super.dispose();
@@ -54,11 +97,18 @@ class LocalUserSignUpPageState extends State<LocalUserSignUpPage> {
       return "";
     }
 
-    final storageRef = widget.storage.ref();
+    final storageRef = _storage.ref();
     final userPhotoRef = storageRef.child("users/$userId/profilePhoto.jpg");
     try {
-      userPhotoRef.putData(await photo.readAsBytes());
-      return userPhotoRef.getDownloadURL();
+      // userPhotoRef.
+      // photo.readAsBytes().then((value) {
+      //   userPhotoRef.putData(value).whenComplete(() => {
+      //     userPhotoRef.getDownloadURL().toString()
+      //   });
+      // });
+      // userPhotoRef.putData(await photo.readAsBytes()).then((p0) {
+      //   return userPhotoRef.getDownloadURL();
+      // });
     } on FirebaseException catch (e) {
       print("Couldn't upload user profile photo: ${e.message}");
     }
@@ -66,28 +116,30 @@ class LocalUserSignUpPageState extends State<LocalUserSignUpPage> {
   }
 
   void _signup() async {
-    var user = LocalUser("id", name.text, age.text, email.text, "", "", "", "",
-        "", password.text, "");
-    widget.auth
+    var user = User();
+    _auth
         .createUserWithEmailAndPassword(
-            email: user.email, password: user.password)
+            email: email.text, password: password.text)
         .then((credential) async {
       if (photo != null) {
-        user.photo = await _uploadPhoto(credential.user?.uid);
+        user.profilePhotoUrl = await _uploadPhoto(credential.user?.uid);
       }
-      widget.database
+
+      user.id = credential.user?.uid;
+      user.name = name.text;
+      user.email = email.text;
+      user.fcmToken = token;
+
+      _database
           .collection("users")
           .doc(credential.user?.uid)
           .set(user.toMap())
           .then((value) {
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(
-                builder: (context) => IntroductionPage(
-                      auth: widget.auth,
-                      database: widget.database,
-                      storage: widget.storage,
-                    )));
+            // TODO: change here to all animals page
+            MaterialPageRoute(builder: (context) => AllAnimals()),
+            (route) => false);
       }).onError((error, _) {
         print('Something went wrong! ${error.toString()}');
       });
@@ -110,7 +162,7 @@ class LocalUserSignUpPageState extends State<LocalUserSignUpPage> {
             color: Color.fromARGB(255, 67, 67, 67),
           ),
         ),
-        drawer: const Drawer(),
+        drawer: AppDrawer(),
         body: Padding(
           padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 24.0),
           child: ListView(
@@ -140,13 +192,6 @@ class LocalUserSignUpPageState extends State<LocalUserSignUpPage> {
                 controller: name,
                 decoration: const InputDecoration(
                   labelText: 'Nome completo',
-                  labelStyle: TextStyle(fontSize: 14.0),
-                ),
-              ),
-              TextField(
-                controller: age,
-                decoration: const InputDecoration(
-                  labelText: 'Idade',
                   labelStyle: TextStyle(fontSize: 14.0),
                 ),
               ),

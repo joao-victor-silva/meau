@@ -50,7 +50,7 @@ class SplashPageState extends State<SplashPage> {
       Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => IntroductionPage(auth: widget.auth, database: widget.database, storage: widget.storage)));
+              builder: (context) => IntroductionPage()));
     });
   }
 }

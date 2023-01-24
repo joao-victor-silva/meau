@@ -4,24 +4,48 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meau/local_user.dart';
+import 'package:meau/pages/Drawer.dart';
+import 'package:meau/pages/all_animals_page.dart';
 import 'package:meau/pages/animal_signup.dart';
 import 'package:meau/pages/introduction_page.dart';
 
-class LocalUserSignInPage extends StatefulWidget {
-  final FirebaseFirestore database;
-  final FirebaseAuth auth;
-  final FirebaseStorage storage;
+class SignIn extends StatefulWidget {
+  static String id = 'signin';
 
-  const LocalUserSignInPage(
-      {super.key, required this.database, required this.auth, required this.storage});
+  SignIn({super.key});
 
   @override
-  State<LocalUserSignInPage> createState() => LocalUserSignInPageState();
+  State<SignIn> createState() => SignInState();
 }
 
-class LocalUserSignInPageState extends State<LocalUserSignInPage> {
+class SignInState extends State<SignIn> {
   final email = TextEditingController();
   final password = TextEditingController();
+
+  late FirebaseAuth _auth;
+  late FirebaseFirestore _database;
+
+  void initAuth() {
+    var auth = FirebaseAuth.instance;
+    setState(() {
+      _auth = auth;
+    });
+    print('Auth initialized');
+  }
+
+  void initDatabase() {
+    var db = FirebaseFirestore.instance;
+    setState(() {
+      _database = db;
+    });
+    print('Database initialized');
+  }
+
+  @override
+  void initState() {
+    initAuth();
+    initDatabase();
+  }
 
   @override
   void dispose() {
@@ -31,26 +55,14 @@ class LocalUserSignInPageState extends State<LocalUserSignInPage> {
   }
 
   void _login() {
-    widget.auth
+    _auth
         .signInWithEmailAndPassword(email: email.text, password: password.text)
-        .then(
-            (credential) => {
-                  // widget.database
-                  //     .collection("users")
-                  //     .doc(email.text)
-                  //     .get()
-                  //     .then((DocumentSnapshot doc) {
-                  //   final data = doc.data() as Map<String, dynamic>;
-                  //   final localUser = LocalUser("", data["fullName"],
-                  //       data["age"], data["email"], "", "", "", "", "", "", "");
-                  //   print('User: ${localUser.toMap().toString()}');
-                  // })
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => AnimalSignUpPage(
-                              database: widget.database, auth: widget.auth, storage: widget.storage,)))
-                }, onError: (error) {
+        .then((credential) {
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => AllAnimals()),
+          (route) => false);
+    }, onError: (error) {
       print('Something went wrong! ${error.toString()}');
     });
   }
@@ -72,7 +84,7 @@ class LocalUserSignInPageState extends State<LocalUserSignInPage> {
             color: Color.fromARGB(255, 67, 67, 67),
           ),
         ),
-        drawer: const Drawer(),
+        drawer: AppDrawer(),
         body: Padding(
           padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 24.0),
           child: ListView(

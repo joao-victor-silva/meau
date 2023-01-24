@@ -2,6 +2,7 @@ class Animal {
   String? id;
   String? name;
   AnimalState? state;
+  AnimalSpecie? specie;
   AnimalGender? gender;
   AnimalSize? size;
   AnimalAge? age;
@@ -19,6 +20,7 @@ class Animal {
     this.id,
     this.name,
     this.state,
+    this.specie,
     this.gender,
     this.size,
     this.age,
@@ -38,10 +40,12 @@ class Animal {
       return;
     }
 
+    // TODO: update the order enum like the specie and gender
     id = map['id'];
     name = map['name'];
     state = map['state'];
-    gender = map['gender'];
+    specie = AnimalSpecie.values.byName(map['specie']);
+    gender = AnimalGender.values.byName(map['gender']);
     size = map['size'];
     age = map['age'];
     behaviors = map['behaviors'];
@@ -51,7 +55,7 @@ class Animal {
     medicines = map['medicines'];
     objects = map['objects'];
     about = map['about'];
-    photoUrls = map['photoUrls'];
+    photoUrls = (map['photoUrls'] as List)?.map((item) => item as String)?.toList();
     ownerId = map['ownerId'];
   }
 
@@ -60,7 +64,8 @@ class Animal {
       "id": id,
       "name": name,
       "state": state,
-      "gender": gender,
+      "specie": specie?.name,
+      "gender": gender?.name,
       "size": size,
       "age": age,
       "behaviors": behaviors,

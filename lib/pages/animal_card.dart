@@ -1,35 +1,19 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:meau/model/animal.dart';
 import 'package:meau/pages/animal_details.dart';
 
 class AnimalCard extends StatelessWidget {
-  final String id;
-  final String name;
-  final String photoUrl;
-  final String specie;
-  final String gender;
-  final String size;
-  final String ownerId;
-  final String ownerToken;
+  final Animal animal;
 
-  const AnimalCard({
-    super.key,
-    required this.id,
-    required this.name,
-    required this.photoUrl,
-    required this.specie,
-    required this.gender,
-    required this.size,
-    required this.ownerId,
-    required this.ownerToken,
-  });
+  const AnimalCard({super.key, required this.animal});
 
   @override
   Widget build(BuildContext context) {
-    var photo = photoUrl;
-    if (id.isNotEmpty) {
-      photo =
-          "https://firebasestorage.googleapis.com/v0/b/meau-c3971.appspot.com/o/animals%2F$id.jpg?alt=media&token=9805742e-61e5-4230-a621-4e36b8462c00";
+    var photo =
+        "https://firebasestorage.googleapis.com/v0/b/meau-c3971.appspot.com/o/animals%2F${animal.id!}.jpg?alt=media&token=9805742e-61e5-4230-a621-4e36b8462c00";
+    if (animal.photoUrls != null && animal.photoUrls!.first.isNotEmpty) {
+      photo = animal.photoUrls!.first;
     }
     return GestureDetector(
         onTap: () {
@@ -37,15 +21,7 @@ class AnimalCard extends StatelessWidget {
               context,
               MaterialPageRoute(
                   builder: (context) => AnimalDetails(
-                        id: id,
-                        photoUrl: photoUrl,
-                        name: name,
-                        temperamento: "",
-                        needs: "",
-                        size: size,
-                        gender: gender,
-                        ownerId: ownerId,
-                        ownerToken: ownerToken,
+                        animal: animal,
                       )));
         },
         child: Card(
@@ -54,7 +30,7 @@ class AnimalCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-                Text(name),
+                Text(animal.name ?? ""),
                 IconButton(
                   icon: const Icon(Icons.favorite_border),
                   onPressed: () {},
@@ -64,14 +40,14 @@ class AnimalCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image(
-                    image: NetworkImage(id.isNotEmpty ? photo : photoUrl),
+                    image: NetworkImage(photo),
                     width: 200,
                   )
                 ],
               ),
               Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-                Text(gender),
-                Text(size),
+                Text(animal.gender?.name ?? ""),
+                Text(animal.size?.name ?? ""),
               ]),
               Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,

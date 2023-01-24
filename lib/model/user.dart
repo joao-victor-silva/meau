@@ -66,7 +66,7 @@ class User {
       "phoneNumber": phoneNumber,
       "nickName": nickName,
       "profilePhotoUrl": profilePhotoUrl,
-      "notificationToken": fcmToken,
+      "fcmToken": fcmToken,
     };
   }
 }
