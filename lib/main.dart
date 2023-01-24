@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:meau/pages/animal_details.dart';
 import 'package:meau/pages/animal_signup.dart';
 import 'package:meau/pages/introduction_page.dart';
@@ -17,26 +21,17 @@ Future<void> _firebaseMessageBackgroundHandler(RemoteMessage message) async {
   print('Handling background message: ${message.messageId}');
 }
 
+late AndroidNotificationChannel channel;
+
+late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  FirebaseMessaging.onBackgroundMessage((message) => _firebaseMessageBackgroundHandler(message));
+  FirebaseMessaging.onBackgroundMessage(
+      (message) => _firebaseMessageBackgroundHandler(message));
 
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-
-  NotificationSettings settings = await _firebaseMessaging.requestPermission(
-    alert: true,
-    announcement: false,
-    badge: true,
-    carPlay: false,
-    criticalAlert: false,
-    provisional: false,
-    sound: true,
-  );
-
-  print('User permissions: ${settings.authorizationStatus}');
-
-  runApp(MyApp());
+  runApp(MyHomePage());
 }
 
 class MyApp extends StatefulWidget {
@@ -70,9 +65,9 @@ class _MyAppState extends State<MyApp> {
     });
 
     // Notifications
-    FirebaseMessaging.instance.getToken().then((value) => {
-      print("FCM Token is: $value")
-    });
+    FirebaseMessaging.instance
+        .getToken()
+        .then((value) => {print("FCM Token is: $value")});
 
     // FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     //   if (message.notification != null) {
@@ -155,8 +150,151 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  late AndroidNotificationChannel channel;
+
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
+  String? token = "";
+
+  Future<void> requestPermissions() async {
+    FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
+
+    NotificationSettings settings = await firebaseMessaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+
+    print('User permissions: ${settings.authorizationStatus}');
+  }
+
+  Future<void> setupFlutterNotifications() async {
+    channel = const AndroidNotificationChannel(
+      'high_importance_channel', // id
+      'High Importance Notifications', // title
+      importance: Importance.high,
+      enableVibration: true,
+    );
+
+    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+    /// Create an Android Notification Channel.
+    ///
+    /// We use this channel in the `AndroidManifest.xml` file to override the
+    /// default FCM channel to enable heads up notifications.
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(channel);
+
+    /// Update the iOS foreground notification presentation options to allow
+    /// heads up notifications.
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+  }
+
+  void showFlutterNotification(RemoteMessage message) {
+    RemoteNotification? notification = message.notification;
+    AndroidNotification? android = message.notification?.android;
+    if (notification != null && android != null && !kIsWeb) {
+      flutterLocalNotificationsPlugin.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            channel.id,
+            channel.name,
+            channelDescription: channel.description,
+            // TODO add a proper drawable resource to android, for now using
+            //      one that already exists in example app.
+            icon: 'launch_background',
+          ),
+        ),
+      );
+    }
+  }
+
+  void getToken() async {
+    await FirebaseMessaging.instance.getToken().then((value) {
+      setState(() {
+        token = value;
+        print("FCM Token: $token");
+      });
+    });
+  }
+
+  void sendPushMessage() async {
+    try {
+      await http.post(Uri.parse('https://fcm.googleapis.com/fcm/send'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization':
+                'key=AAAAMqoYe-0:APA91bE0roCBA2WIAIVdMENoR8Rh-s3Hyh9Q_D5VJKYHzSZeE9DU-70oLa5n4mVCgxHwZCyydZMlmxr___DgyOaqDsZS1BLXnw_7CQgxfILxciKfClWwytIt8xAdULfbrWj7KCAz1mL3',
+          },
+          body: jsonEncode({
+            // 'token': 'dgdLqwMBQOmqK8kwdGICXu:APA91bFIDZD9Ue-kp-966uG4hj4Io2Dv4pNBHz_mVHjyIIo3VRGYUF4OncJg1POHBZYJrrVdnM1rwCrsDDQBNZcVFm5BE7kdFyO7lQwT1QnCclOOOu81tneKCn0yzLcm9cfY1GznzTqm',
+            'notification': {
+              'title': 'Test title',
+              'body': 'Test body',
+            },
+            'priority': 'high',
+            'data': <String, dynamic>{
+              'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+              'id': '1',
+              'status': 'done',
+              // 'via': 'FlutterFire Cloud Messaging!!!',
+              // 'count': _messageCount.toString(),
+            },
+            'to': '/topics/Animal',
+            // can send to other user by setting its token here
+            // 'to': '$token',
+          }));
+      print('FCM request for device sent!');
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    requestPermissions();
+
+    setupFlutterNotifications();
+
+    FirebaseMessaging.onMessage.listen(showFlutterNotification);
+
+    getToken();
+
+    FirebaseMessaging.instance.subscribeToTopic('Animal');
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold();
+    return MaterialApp(
+      title: "Sample",
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text("Sample"),
+        ),
+        body: Center(
+          child: GestureDetector(
+              onTap: () {
+                sendPushMessage();
+              },
+              child: Text('Sample')),
+        ),
+      ),
+    );
   }
 }
