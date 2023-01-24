@@ -1,4 +1,4 @@
-class AnimalModel {
+class Animal {
   String? id;
   String? name;
   AnimalState? state;
@@ -15,7 +15,7 @@ class AnimalModel {
   List<String>? photoUrls;
   String? ownerId;
 
-  AnimalModel({
+  Animal({
     this.id,
     this.name,
     this.state,
@@ -33,7 +33,7 @@ class AnimalModel {
     this.ownerId,
   });
 
-  AnimalModel.fromMap(Map<String, dynamic>? map) {
+  Animal.fromMap(Map<String, dynamic>? map) {
     if (map == null) {
       return;
     }

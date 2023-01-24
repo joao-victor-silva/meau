@@ -1,4 +1,6 @@
-class UserModel {
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class User {
   String? id;
   String? name;
   DateTime? birthDate;
@@ -11,7 +13,7 @@ class UserModel {
   String? profilePhotoUrl;
   String? fcmToken;
 
-  UserModel(
+  User(
       {this.id,
       this.name,
       this.birthDate,
@@ -24,7 +26,7 @@ class UserModel {
       this.profilePhotoUrl,
       this.fcmToken});
 
-  UserModel.fromMap(Map<String, dynamic>? map) {
+  User.fromMap(Map<String, dynamic>? map) {
     if (map == null) {
       return;
     }
@@ -40,6 +42,16 @@ class UserModel {
     nickName = map['nickName'];
     profilePhotoUrl = map['profilePhotoUrl'];
     fcmToken = map['fcmToken'];
+  }
+
+  User.fromDocumentSnapshot(DocumentSnapshot? doc) {
+    if (doc == null) {
+      return;
+    }
+
+    var map = doc.data() as Map<String, dynamic>;
+
+    User.fromMap(map);
   }
 
   Map<String, dynamic> toMap() {
