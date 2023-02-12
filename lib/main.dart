@@ -12,6 +12,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:meau/pages/all_animals_page.dart';
 import 'package:meau/pages/animal_details.dart';
 import 'package:meau/pages/animal_signup.dart';
+import 'package:meau/pages/chat.dart';
 import 'package:meau/pages/introduction_page.dart';
 import 'package:meau/pages/local_user_signin.dart';
 import 'package:meau/pages/local_user_signup.dart';

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
+import 'package:meau/pages/chat.dart';
 
 class NotificationCard extends StatefulWidget {
   final Map<String, dynamic> notification;
@@ -66,6 +67,16 @@ class NotificationCardState extends State<NotificationCard> {
                   });
                 },
                 child: Text('Aceitar')),
+            TextButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => Chat(
+                              otherParticipant:
+                                  widget.notification['sourceId'])));
+                },
+                child: Text('Chat')),
             TextButton(
                 onPressed: () {
                   setState(() {
