@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class User {
   String? id;
   String? name;
-  DateTime? birthDate;
+  String? age;
   String? email;
   String? state;
   String? city;
@@ -16,7 +16,7 @@ class User {
   User(
       {this.id,
       this.name,
-      this.birthDate,
+      this.age,
       this.email,
       this.state,
       this.city,
@@ -33,7 +33,7 @@ class User {
 
     id = map['id'];
     name = map['name'];
-    birthDate = DateTime.parse(map['birthDate']);
+    age = map['age'];
     email = map['email'];
     state = map['state'];
     city = map['city'];
@@ -44,21 +44,11 @@ class User {
     fcmToken = map['fcmToken'];
   }
 
-  User.fromDocumentSnapshot(DocumentSnapshot? doc) {
-    if (doc == null) {
-      return;
-    }
-
-    var map = doc.data() as Map<String, dynamic>;
-
-    User.fromMap(map);
-  }
-
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       "id": id,
       "name": name,
-      "birthDate": birthDate.toString(),
+      "age": age,
       "email": email,
       "state": state,
       "city": city,
