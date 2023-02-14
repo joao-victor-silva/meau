@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Animal {
   String? id;
   String? name;
@@ -43,15 +45,15 @@ class Animal {
     // TODO: update the order enum like the specie and gender
     id = map['id'];
     name = map['name'];
-    state = map['state'];
+    state = AnimalState.values.byName(map['state']);
     specie = AnimalSpecie.values.byName(map['specie']);
     gender = AnimalGender.values.byName(map['gender']);
-    size = map['size'];
-    age = map['age'];
-    behaviors = map['behaviors'];
-    healths = map['healths'];
-    sponsorshipRequirements = map['sponsorshipRequirements'];
-    needs = map['needs'];
+    size = AnimalSize.values.byName(map['size']);
+    age = AnimalAge.values.byName(map['age']);
+    behaviors = (map['behaviors'] as List)?.map((e) => AnimalBehavior.values.byName(e as String))?.toList();
+    healths = (map['healths'] as List)?.map((e) => AnimalHealth.values.byName(e as String))?.toList();
+    sponsorshipRequirements = (map['sponsorshipRequirements'] as List)?.map((e) => AnimalSponsorshipRequirement.values.byName(e as String))?.toList();
+    needs = (map['needs'] as List)?.map((e) => AnimalNeed.values.byName(e as String))?.toList();
     medicines = map['medicines'];
     objects = map['objects'];
     about = map['about'];
@@ -59,19 +61,29 @@ class Animal {
     ownerId = map['ownerId'];
   }
 
+  Animal.fromDocumentSnapshot(DocumentSnapshot? doc) {
+    if (doc == null) {
+      return;
+    }
+
+    var map = doc.data() as Map<String, dynamic>;
+
+    Animal.fromMap(map);
+  }
+
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       "id": id,
       "name": name,
-      "state": state,
+      "state": state?.name,
       "specie": specie?.name,
       "gender": gender?.name,
-      "size": size,
-      "age": age,
-      "behaviors": behaviors,
-      "healths": healths,
-      "sponsorshipRequirements": sponsorshipRequirements,
-      "needs": needs,
+      "size": size?.name,
+      "age": age?.name,
+      "behaviors": behaviors?.map((e) => e.name),
+      "healths": healths?.map((e) => e.name),
+      "sponsorshipRequirements": sponsorshipRequirements?.map((e) => e.name),
+      "needs": needs?.map((e) => e.name),
       "medicines": medicines,
       "objects": objects,
       "about": about,
@@ -123,16 +135,16 @@ enum AnimalHealth {
 
 enum AnimalSponsorshipRequirement {
   sponsorshipTerm,
-  financilAssistence,
-  financilAssistenceFood,
-  financilAssistenceHealth,
-  financilAssistenceObject,
+  financialAssistance,
+  financialAssistanceFood,
+  financialAssistanceHealth,
+  financialAssistanceObject,
   visitsToTheAnimal,
 }
 
 enum AnimalNeed {
   food,
-  financilAssistence,
+  financialAssistance,
   medicine,
   object,
 }
