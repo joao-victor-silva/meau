@@ -45,30 +45,20 @@ class Animal {
     // TODO: update the order enum like the specie and gender
     id = map['id'];
     name = map['name'];
-    state = AnimalState.values.byName(map['state']);
-    specie = AnimalSpecie.values.byName(map['specie']);
-    gender = AnimalGender.values.byName(map['gender']);
-    size = AnimalSize.values.byName(map['size']);
-    age = AnimalAge.values.byName(map['age']);
-    behaviors = (map['behaviors'] as List)?.map((e) => AnimalBehavior.values.byName(e as String))?.toList();
-    healths = (map['healths'] as List)?.map((e) => AnimalHealth.values.byName(e as String))?.toList();
-    sponsorshipRequirements = (map['sponsorshipRequirements'] as List)?.map((e) => AnimalSponsorshipRequirement.values.byName(e as String))?.toList();
-    needs = (map['needs'] as List)?.map((e) => AnimalNeed.values.byName(e as String))?.toList();
+    state = map['state'] != null ? AnimalState.values.byName(map['state']) : null;
+    specie = map['specie'] != null ? AnimalSpecie.values.byName(map['specie']) : null;
+    gender = map['specie'] != null ? AnimalGender.values.byName(map['gender']) : null;
+    size = map['size'] != null ? AnimalSize.values.byName(map['size']) : null;
+    age = map['age'] != null ? AnimalAge.values.byName(map['age']) : null;
+    behaviors = map['behaviors'] != null ? (map['behaviors'] as List)?.map((e) => AnimalBehavior.values.byName(e as String))?.toList() : null;
+    healths = map['healths'] != null ? (map['healths'] as List)?.map((e) => AnimalHealth.values.byName(e as String))?.toList() : null;
+    sponsorshipRequirements = map['sponsorshipRequirements']!= null ? (map['sponsorshipRequirements'] as List)?.map((e) => AnimalSponsorshipRequirement.values.byName(e as String))?.toList() : null;
+    needs = map['needs'] != null ? (map['needs'] as List)?.map((e) => AnimalNeed.values.byName(e as String))?.toList() : null;
     medicines = map['medicines'];
     objects = map['objects'];
     about = map['about'];
-    photoUrls = (map['photoUrls'] as List)?.map((item) => item as String)?.toList();
+    photoUrls = map['photoUrls'] != null ? (map['photoUrls'] as List)?.map((item) => item as String)?.toList() : null;
     ownerId = map['ownerId'];
-  }
-
-  Animal.fromDocumentSnapshot(DocumentSnapshot? doc) {
-    if (doc == null) {
-      return;
-    }
-
-    var map = doc.data() as Map<String, dynamic>;
-
-    Animal.fromMap(map);
   }
 
   Map<String, dynamic> toMap() {
