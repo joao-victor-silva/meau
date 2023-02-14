@@ -33,7 +33,7 @@ class User {
 
     id = map['id'];
     name = map['name'];
-    birthDate = map['birthDate'];
+    birthDate = DateTime.parse(map['birthDate']);
     email = map['email'];
     state = map['state'];
     city = map['city'];
@@ -58,7 +58,7 @@ class User {
     return <String, dynamic>{
       "id": id,
       "name": name,
-      "birthDate": birthDate,
+      "birthDate": birthDate.toString(),
       "email": email,
       "state": state,
       "city": city,
