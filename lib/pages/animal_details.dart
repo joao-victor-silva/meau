@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
 import '../model/animal.dart';
@@ -23,7 +24,20 @@ class AnimalDetails extends StatelessWidget {
       photo = animal.photoUrls!.first;
     }
     return Scaffold(
-      appBar: AppBar(leading: const BackButton()),
+      appBar: AppBar(
+        leading: const BackButton(),
+        title: Text('${animal.name ?? ""}'),
+        backgroundColor: const Color(0xffffd358),
+        shadowColor: Colors.transparent,
+        systemOverlayStyle:
+        const SystemUiOverlayStyle(statusBarColor: Color(0xfff7a800)),
+        foregroundColor: const Color.fromARGB(255, 67, 67, 67),
+        titleTextStyle: const TextStyle(
+          fontFamily: 'Roboto Medium',
+          fontSize: 20,
+          color: Color.fromARGB(255, 67, 67, 67),
+        ),
+      ),
       body: ListView(
         children: [
           photo.isNotEmpty
@@ -33,16 +47,23 @@ class AnimalDetails extends StatelessWidget {
               : Container(),
           Text(
             animal.name ?? "",
+            textAlign: TextAlign.center,
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           SizedBox(
             height: 16,
           ),
-          getTextWidget('PORTE', animal.size?.name ?? ""),
-          getTextWidget('GENERO', animal.gender?.name ?? ""),
-          getTextWidget('TEMPERAMENTO', animal.behaviors?.join(", ") ?? ""),
-          getTextWidget('o que ${animal.name!} precisa'.toUpperCase(),
-              animal.needs?.join(", ") ?? ""),
+          getTextWidget('ESPÉCIE', animalSpecieTranslate(animal.specie)),
+          getTextWidget('SEXO', animalGenderTranslate(animal.gender)),
+          getTextWidget('PORTE', animalSizeTranslate(animal.size)),
+          getTextWidget('IDADE', animalAgeTranslate(animal.age)),
+          getTextWidget('TEMPERAMENTO', animal.behaviors?.map((e) => animalBehaviorTranslate(e)).toList().join(" - ") ?? ""),
+          getTextWidget('SAÚDE', animal.healths?.map((e) => animalHealthTranslate(e)).toList().join(" - ") ?? ""),
+          getTextWidget('DOENÇAS', animal.illness ?? ""),
+          getTextWidget('EXIGÊNCIAS PARA ADOÇÃO', animal.adoptRequirements?.map((e) => animalAdoptRequirementTranslate(e)).toList().join(" - ") ?? ""),
+          getTextWidget('SOBRE O ANIMAL', animal.about ?? ""),
+          // getTextWidget('o que ${animal.name!} precisa'.toUpperCase(),
+          //     animal.needs?.join(", ") ?? ""),
           getAdoptButton()
         ],
       ),
@@ -54,16 +75,26 @@ class AnimalDetails extends StatelessWidget {
 
     return Container(
       child: Align(
-        alignment: Alignment.centerLeft,
+        alignment: Alignment.center,
         child: Column(
           children: [
             Text(
               title,
-              style: TextStyle(fontSize: 12),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: "Roboto Regular",
+                fontSize: 12.0,
+                color: Color(0xfff7a800),
+              ),
             ),
             Text(
               value,
-              style: TextStyle(fontSize: 14),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: "Roboto Regular",
+                fontSize: 14.0,
+                color: Color(0xff757575),
+              ),
             ),
             SizedBox(
               height: 16,

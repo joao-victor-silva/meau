@@ -1,10 +1,12 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:meau/pages/Drawer.dart';
+import 'package:meau/pages/drawer.dart';
 import 'package:meau/pages/all_animals_page.dart';
 import 'package:meau/pages/introduction_page.dart';
 import 'package:image_picker/image_picker.dart';
@@ -22,10 +24,20 @@ class SignUp extends StatefulWidget {
 
 class SignUpState extends State<SignUp> {
   final name = TextEditingController();
+  final age = TextEditingController();
   final email = TextEditingController();
+  final state = TextEditingController();
+  final city = TextEditingController();
+  final address = TextEditingController();
+  final phoneNumber = TextEditingController();
+  final nickName = TextEditingController();
   final password = TextEditingController();
+  final passwordConfirmation = TextEditingController();
   final _picker = ImagePicker();
-  late XFile photo;
+  XFile? photo;
+
+  dynamic _pickImageError;
+  String? _retrieveDataError;
 
   String? token = "";
 
@@ -83,32 +95,29 @@ class SignUpState extends State<SignUp> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final imagePicked = await _picker.pickImage(source: source);
+    try {
+      final imagePicked = await _picker.pickImage(source: source);
 
-    if (imagePicked != null) {
+      if (imagePicked != null) {
+        setState(() {
+          photo = imagePicked;
+        });
+      }
+    } catch (e) {
       setState(() {
-        photo = imagePicked;
+        _pickImageError = e;
       });
     }
   }
 
   Future<String> _uploadPhoto(String? userId) async {
-    if (photo == null) {
-      return "";
-    }
-
-    final storageRef = _storage.ref();
-    final userPhotoRef = storageRef.child("users/$userId/profilePhoto.jpg");
     try {
-      // userPhotoRef.
-      // photo.readAsBytes().then((value) {
-      //   userPhotoRef.putData(value).whenComplete(() => {
-      //     userPhotoRef.getDownloadURL().toString()
-      //   });
-      // });
-      // userPhotoRef.putData(await photo.readAsBytes()).then((p0) {
-      //   return userPhotoRef.getDownloadURL();
-      // });
+      final storageRef = _storage.ref();
+      final userPhotoRef = storageRef.child("users/$userId/profilePhoto.jpg");
+      var data = await photo!.readAsBytes();
+      var task = await userPhotoRef.putData(data);
+      var url = await task.ref.getDownloadURL();
+      return url;
     } on FirebaseException catch (e) {
       print("Couldn't upload user profile photo: ${e.message}");
     }
@@ -127,7 +136,13 @@ class SignUpState extends State<SignUp> {
 
       user.id = credential.user?.uid;
       user.name = name.text;
+      user.age = age.text;
       user.email = email.text;
+      user.state = state.text;
+      user.city = city.text;
+      user.address = address.text;
+      user.phoneNumber = phoneNumber.text;
+      user.nickName = nickName.text;
       user.fcmToken = token;
 
       _database
@@ -137,7 +152,6 @@ class SignUpState extends State<SignUp> {
           .then((value) {
         Navigator.pushAndRemoveUntil(
             context,
-            // TODO: change here to all animals page
             MaterialPageRoute(builder: (context) => AllAnimals()),
             (route) => false);
       }).onError((error, _) {
@@ -166,6 +180,7 @@ class SignUpState extends State<SignUp> {
         body: Padding(
           padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 24.0),
           child: ListView(
+            shrinkWrap: true,
             children: [
               Container(
                 decoration:
@@ -183,7 +198,10 @@ class SignUpState extends State<SignUp> {
               ),
               Container(
                 alignment: Alignment.topLeft,
-                child: const Text('INFORMAÇÕES PESSOAIS'),
+                child: const Text(
+                  'INFORMAÇÕES PESSOAIS',
+                  style: TextStyle(color: Color(0xff88c9bf)),
+                ),
               ),
               const SizedBox(
                 height: 32.0,
@@ -192,56 +210,280 @@ class SignUpState extends State<SignUp> {
                 controller: name,
                 decoration: const InputDecoration(
                   labelText: 'Nome completo',
-                  labelStyle: TextStyle(fontSize: 14.0),
+                  labelStyle: TextStyle(
+                    fontSize: 14.0,
+                    fontFamily: "Roboto Regular",
+                    color: Color(0xffbdbdbd),
+                    backgroundColor: Color(0xfffafafa),
+                  ),
+                ),
+              ),
+              TextField(
+                controller: age,
+                decoration: const InputDecoration(
+                  labelText: 'Idade',
+                  labelStyle: TextStyle(
+                    fontSize: 14.0,
+                    fontFamily: "Roboto Regular",
+                    color: Color(0xffbdbdbd),
+                    backgroundColor: Color(0xfffafafa),
+                  ),
                 ),
               ),
               TextField(
                 controller: email,
                 decoration: const InputDecoration(
                   labelText: 'Email',
-                  labelStyle: TextStyle(fontSize: 14.0),
+                  labelStyle: TextStyle(
+                    fontSize: 14.0,
+                    fontFamily: "Roboto Regular",
+                    color: Color(0xffbdbdbd),
+                    backgroundColor: Color(0xfffafafa),
+                  ),
                 ),
               ),
               TextField(
-                controller: password,
+                controller: state,
                 decoration: const InputDecoration(
-                  labelText: 'Senha',
-                  labelStyle: TextStyle(fontSize: 14.0),
+                  labelText: 'Estado',
+                  labelStyle: TextStyle(
+                    fontSize: 14.0,
+                    fontFamily: "Roboto Regular",
+                    color: Color(0xffbdbdbd),
+                    backgroundColor: Color(0xfffafafa),
+                  ),
+                ),
+              ),
+              TextField(
+                controller: city,
+                decoration: const InputDecoration(
+                  labelText: 'Cidade',
+                  labelStyle: TextStyle(
+                    fontSize: 14.0,
+                    fontFamily: "Roboto Regular",
+                    color: Color(0xffbdbdbd),
+                    backgroundColor: Color(0xfffafafa),
+                  ),
+                ),
+              ),
+              TextField(
+                controller: address,
+                decoration: const InputDecoration(
+                  labelText: 'Endereço',
+                  labelStyle: TextStyle(
+                    fontSize: 14.0,
+                    fontFamily: "Roboto Regular",
+                    color: Color(0xffbdbdbd),
+                    backgroundColor: Color(0xfffafafa),
+                  ),
+                ),
+              ),
+              TextField(
+                controller: phoneNumber,
+                decoration: const InputDecoration(
+                  labelText: 'Telefone',
+                  labelStyle: TextStyle(
+                    fontSize: 14.0,
+                    fontFamily: "Roboto Regular",
+                    color: Color(0xffbdbdbd),
+                    backgroundColor: Color(0xfffafafa),
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 28.0,
+              ),
+              Container(
+                alignment: Alignment.topLeft,
+                child: const Text(
+                  'INFORMAÇÕES DE PERFIL',
+                  style: TextStyle(color: Color(0xff88c9bf)),
                 ),
               ),
               const SizedBox(
                 height: 32.0,
               ),
-              TextButton(
-                onPressed: () => _pickImage(ImageSource.camera),
-                style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.all<Color>(
-                        const Color.fromARGB(255, 67, 67, 67)),
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        const Color.fromARGB(255, 207, 233, 229))),
-                child: const Text('CAMERA', style: TextStyle(fontSize: 12.0)),
+              TextField(
+                controller: nickName,
+                decoration: const InputDecoration(
+                  labelText: 'Nome de usuário',
+                  labelStyle: TextStyle(
+                    fontSize: 14.0,
+                    fontFamily: "Roboto Regular",
+                    color: Color(0xffbdbdbd),
+                    backgroundColor: Color(0xfffafafa),
+                  ),
+                ),
               ),
-              TextButton(
-                onPressed: () => _pickImage(ImageSource.gallery),
-                style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.all<Color>(
-                        const Color.fromARGB(255, 67, 67, 67)),
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        const Color.fromARGB(255, 207, 233, 229))),
-                child: const Text('GALERIA', style: TextStyle(fontSize: 12.0)),
+              TextField(
+                controller: password,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Senha',
+                  labelStyle: TextStyle(
+                    fontSize: 14.0,
+                    fontFamily: "Roboto Regular",
+                    color: Color(0xffbdbdbd),
+                    backgroundColor: Color(0xfffafafa),
+                  ),
+                ),
               ),
-              TextButton(
-                onPressed: () => _signup(),
-                style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.all<Color>(
-                        const Color.fromARGB(255, 67, 67, 67)),
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        const Color.fromARGB(255, 207, 233, 229))),
-                child: const Text('FAZER CADASTRO',
-                    style: TextStyle(fontSize: 12.0)),
+              TextField(
+                controller: passwordConfirmation,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Confirmação de senha',
+                  labelStyle: TextStyle(
+                    fontSize: 14.0,
+                    fontFamily: "Roboto Regular",
+                    color: Color(0xffbdbdbd),
+                    backgroundColor: Color(0xfffafafa),
+                  ),
+                ),
               ),
+              const SizedBox(
+                height: 28.0,
+              ),
+              Container(
+                alignment: Alignment.topLeft,
+                child: const Text(
+                  'FOTO DE PERFIL',
+                  style: TextStyle(color: Color(0xff88c9bf)),
+                ),
+              ),
+              const SizedBox(
+                height: 32.0,
+              ),
+              _previewImages(),
+              const SizedBox(
+                height: 32.0,
+              ),
+              Container(
+                width: 180.0,
+                child: TextButton(
+                  onPressed: () => _signup(),
+                  style: ButtonStyle(
+                      foregroundColor: MaterialStateProperty.all<Color>(
+                          const Color.fromARGB(255, 67, 67, 67)),
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          const Color.fromARGB(255, 207, 233, 229))),
+                  child: const Text('FAZER CADASTRO',
+                      style: TextStyle(fontSize: 12.0)),
+                ),
+              )
             ],
           ),
         ));
+  }
+
+  Future<void> _displayPickImageDialog(BuildContext context) async {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Fonte'),
+            content: Text("Escolha a origem da imagem"),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancelar'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: const Text('Galeria'),
+                onPressed: () {
+                  _pickImage(ImageSource.gallery);
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                  child: const Text('Camera'),
+                  onPressed: () {
+                    _pickImage(ImageSource.camera);
+                    Navigator.of(context).pop();
+                  }),
+            ],
+          );
+        });
+  }
+
+  Widget _previewImages() {
+    final Text? retrieveError = _getRetrieveErrorWidget();
+    if (retrieveError != null) {
+      return retrieveError;
+    }
+    if (photo != null) {
+      return Container(
+        width: 132.0,
+        height: 132.0,
+        child: Image.file(
+          File(photo!.path),
+        ),
+      );
+      // return Semantics(
+      //   label: 'image_picker_example_picked_images',
+      //   child: ListView.builder(
+      //     key: UniqueKey(),
+      //     itemBuilder: (BuildContext context, int index) {
+      //       return Semantics(
+      //         label: 'image_picker_example_picked_image',
+      //         child: Image.file(
+      //           File(photo!.path),
+      //           width: 132.0,
+      //           height: 132.0,
+      //         ),
+      //       );
+      //     },
+      //     itemCount: 1,
+      //   ),
+      // );
+    } else if (_pickImageError != null) {
+      return Text(
+        'Pick image error: $_pickImageError',
+        textAlign: TextAlign.center,
+      );
+    } else {
+      return GestureDetector(
+        onTap: () {
+          _displayPickImageDialog(context);
+        },
+        child: Container(
+          width: 132.0,
+          height: 132.0,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(0.0, 44.0, 0.0, 48.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.control_point,
+                  size: 24.0,
+                  color: Color(0xff757575),
+                ),
+                Text(
+                  "adicionar foto",
+                  style: TextStyle(
+                    fontFamily: "Roboto Regular",
+                    fontSize: 14.0,
+                    color: Color(0xff757575),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          color: Color(0xffe6e7e7),
+        ),
+      );
+    }
+  }
+
+  Text? _getRetrieveErrorWidget() {
+    if (_retrieveDataError != null) {
+      final Text result = Text(_retrieveDataError!);
+      _retrieveDataError = null;
+      return result;
+    }
+    return null;
   }
 }

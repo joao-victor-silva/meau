@@ -10,10 +10,8 @@ class Animal {
   AnimalAge? age;
   List<AnimalBehavior>? behaviors;
   List<AnimalHealth>? healths;
-  List<AnimalSponsorshipRequirement>? sponsorshipRequirements;
-  List<AnimalNeed>? needs;
-  String? medicines;
-  String? objects;
+  List<AnimalAdoptRequirement>? adoptRequirements;
+  String? illness;
   String? about;
   List<String>? photoUrls;
   String? ownerId;
@@ -28,10 +26,8 @@ class Animal {
     this.age,
     this.behaviors,
     this.healths,
-    this.sponsorshipRequirements,
-    this.needs,
-    this.medicines,
-    this.objects,
+    this.adoptRequirements,
+    this.illness,
     this.about,
     this.photoUrls,
     this.ownerId,
@@ -42,7 +38,6 @@ class Animal {
       return;
     }
 
-    // TODO: update the order enum like the specie and gender
     id = map['id'];
     name = map['name'];
     state = map['state'] != null ? AnimalState.values.byName(map['state']) : null;
@@ -52,10 +47,8 @@ class Animal {
     age = map['age'] != null ? AnimalAge.values.byName(map['age']) : null;
     behaviors = map['behaviors'] != null ? (map['behaviors'] as List)?.map((e) => AnimalBehavior.values.byName(e as String))?.toList() : null;
     healths = map['healths'] != null ? (map['healths'] as List)?.map((e) => AnimalHealth.values.byName(e as String))?.toList() : null;
-    sponsorshipRequirements = map['sponsorshipRequirements']!= null ? (map['sponsorshipRequirements'] as List)?.map((e) => AnimalSponsorshipRequirement.values.byName(e as String))?.toList() : null;
-    needs = map['needs'] != null ? (map['needs'] as List)?.map((e) => AnimalNeed.values.byName(e as String))?.toList() : null;
-    medicines = map['medicines'];
-    objects = map['objects'];
+    adoptRequirements = map['adoptRequirements']!= null ? (map['adoptRequirements'] as List)?.map((e) => AnimalAdoptRequirement.values.byName(e as String))?.toList() : null;
+    illness = map['illness'];
     about = map['about'];
     photoUrls = map['photoUrls'] != null ? (map['photoUrls'] as List)?.map((item) => item as String)?.toList() : null;
     ownerId = map['ownerId'];
@@ -70,12 +63,10 @@ class Animal {
       "gender": gender?.name,
       "size": size?.name,
       "age": age?.name,
-      "behaviors": behaviors?.map((e) => e.name),
-      "healths": healths?.map((e) => e.name),
-      "sponsorshipRequirements": sponsorshipRequirements?.map((e) => e.name),
-      "needs": needs?.map((e) => e.name),
-      "medicines": medicines,
-      "objects": objects,
+      "behaviors": behaviors?.map((e) => e.name).toList(),
+      "healths": healths?.map((e) => e.name).toList(),
+      "adoptRequirements": adoptRequirements?.map((e) => e.name).toList(),
+      "illness": illness,
       "about": about,
       "photoUrls": photoUrls,
       "ownerId": ownerId,
@@ -97,9 +88,35 @@ enum AnimalSpecie {
   dog,
 }
 
+String animalSpecieTranslate(AnimalSpecie? specie) {
+  if (specie == null) {
+    return "";
+  }
+
+  switch (specie) {
+    case AnimalSpecie.cat:
+      return "Gato";
+    case AnimalSpecie.dog:
+      return "Cachorro";
+  }
+}
+
 enum AnimalGender {
   female,
   male,
+}
+
+String animalGenderTranslate(AnimalGender? gender) {
+  if (gender == null) {
+    return "";
+  }
+
+  switch (gender) {
+    case AnimalGender.female:
+      return "Fêmea";
+    case AnimalGender.male:
+      return "Macho";
+  }
 }
 
 enum AnimalSize {
@@ -108,13 +125,72 @@ enum AnimalSize {
   big,
 }
 
+String animalSizeTranslate(AnimalSize? size) {
+  if (size == null) {
+    return "";
+  }
+
+  switch (size) {
+    case AnimalSize.small:
+      return "Pequeno";
+    case AnimalSize.medium:
+      return "Médio";
+    case AnimalSize.big:
+      return "Grande";
+  }
+}
+
 enum AnimalAge {
   young,
   adult,
   old,
 }
 
-enum AnimalBehavior { playful, shy, calm, watchful, loving, lazy }
+
+String animalAgeTranslate(AnimalAge? age) {
+  if (age == null) {
+    return "";
+  }
+
+  switch (age) {
+    case AnimalAge.young:
+      return "Filhote";
+    case AnimalAge.adult:
+      return "Adulto";
+    case AnimalAge.old:
+      return "Idoso";
+  }
+}
+
+enum AnimalBehavior {
+  playful,
+  shy,
+  calm,
+  watchful,
+  loving,
+  lazy
+}
+
+String animalBehaviorTranslate(AnimalBehavior? behavior) {
+  if (behavior == null) {
+    return "";
+  }
+
+  switch (behavior) {
+    case AnimalBehavior.playful:
+      return "Brincalhão";
+    case AnimalBehavior.shy:
+      return "Tímido";
+    case AnimalBehavior.calm:
+      return "Calmo";
+    case AnimalBehavior.watchful:
+      return "Guarda";
+    case AnimalBehavior.loving:
+      return "Amoroso";
+    case AnimalBehavior.lazy:
+      return "Preguiçoso";
+  }
+}
 
 enum AnimalHealth {
   vaccinated,
@@ -123,13 +199,45 @@ enum AnimalHealth {
   sick,
 }
 
-enum AnimalSponsorshipRequirement {
-  sponsorshipTerm,
-  financialAssistance,
-  financialAssistanceFood,
-  financialAssistanceHealth,
-  financialAssistanceObject,
-  visitsToTheAnimal,
+String animalHealthTranslate(AnimalHealth? health) {
+  if (health == null) {
+    return "";
+  }
+
+  switch (health) {
+    case AnimalHealth.vaccinated:
+      return "Vacinado";
+    case AnimalHealth.dewormed:
+      return "Vermifugado";
+    case AnimalHealth.castrated:
+      return "Castrado";
+    case AnimalHealth.sick:
+      return "Doente";
+  }
+}
+
+enum AnimalAdoptRequirement {
+  adoptTerm,
+  housePhotos,
+  previousVisitToTheAnimal,
+  postAdoptionFollowUps,
+}
+
+String animalAdoptRequirementTranslate(AnimalAdoptRequirement? requirement) {
+  if (requirement == null) {
+    return "";
+  }
+
+  switch (requirement) {
+    case AnimalAdoptRequirement.adoptTerm:
+      return "Termo de adoção";
+    case AnimalAdoptRequirement.housePhotos:
+      return "Fotos da casa";
+    case AnimalAdoptRequirement.previousVisitToTheAnimal:
+      return "Visita prévia ao animal";
+    case AnimalAdoptRequirement.postAdoptionFollowUps:
+      return "Acompanhamento pós adoção";
+  }
 }
 
 enum AnimalNeed {

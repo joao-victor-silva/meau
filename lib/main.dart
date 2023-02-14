@@ -17,6 +17,7 @@ import 'package:meau/pages/introduction_page.dart';
 import 'package:meau/pages/local_user_signin.dart';
 import 'package:meau/pages/local_user_signup.dart';
 import 'package:meau/pages/my_animals_page.dart';
+import 'package:meau/pages/my_chats.dart';
 import 'package:meau/pages/notifications.dart';
 import 'package:meau/pages/splash_page.dart';
 import 'package:meau/pages/unauthenticated_page.dart';
@@ -170,6 +171,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       initialRoute: FirebaseAuth.instance.currentUser == null ? IntroductionPage.id : AllAnimals.id,
       routes: {
         IntroductionPage.id: (context) => IntroductionPage(),
@@ -180,6 +182,7 @@ class _MyAppState extends State<MyApp> {
         MyAnimals.id: (context) => MyAnimals(),
         Notifications.id: (context) => Notifications(),
         AnimalSignUpPage.id: (context) => AnimalSignUpPage(),
+        MyChats.id: (context) => MyChats(),
       },
       home: IntroductionPage(),
     );

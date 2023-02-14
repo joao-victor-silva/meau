@@ -1,12 +1,14 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:meau/model/animal.dart';
+import 'package:meau/model/user.dart';
 import 'package:meau/pages/animal_details.dart';
 
 class AnimalCard extends StatelessWidget {
   final Animal animal;
+  final User owner;
 
-  const AnimalCard({super.key, required this.animal});
+  const AnimalCard({super.key, required this.animal, required this.owner});
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +33,10 @@ class AnimalCard extends StatelessWidget {
             children: [
               Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
                 Text(animal.name ?? ""),
-                IconButton(
-                  icon: const Icon(Icons.favorite_border),
-                  onPressed: () {},
-                )
+                // IconButton(
+                //   icon: const Icon(Icons.favorite_border),
+                //   onPressed: () {},
+                // )
               ]),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -46,14 +48,14 @@ class AnimalCard extends StatelessWidget {
                 ],
               ),
               Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-                Text(animal.gender?.name ?? ""),
-                Text(animal.size?.name ?? ""),
+                Text(animalGenderTranslate(animal.gender)),
+                Text(animalSizeTranslate(animal.size)),
               ]),
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: const [
-                    Text('Cidade - Estado'),
-                  ]),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+                owner.city != null && owner.state != null
+                    ? Text('${owner.city!} - ${owner.state!}')
+                    : Text('Cidade - Estado'),
+              ]),
             ],
           ),
         ));

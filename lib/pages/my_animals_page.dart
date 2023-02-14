@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:meau/model/animal.dart';
-import 'package:meau/pages/Drawer.dart';
+import 'package:meau/model/user.dart';
+import 'package:meau/pages/drawer.dart';
 
 import 'animal_card.dart';
 
@@ -17,13 +19,19 @@ class MyAnimals extends StatefulWidget {
 
 class MyAnimalsState extends State<MyAnimals> {
   List<Animal> animals = List.empty();
-  void getAnimals() async {
-    _database.collection("animals")
-      .where("ownerId", isEqualTo: _auth.currentUser!.uid)
-        .get().then((value) {
+
+  List<Widget>? animalCards = List.empty();
+
+  Future<void> getAnimals() async {
+    _database
+        .collection("animals")
+        .where("ownerId", isEqualTo: _auth.currentUser!.uid)
+        .get()
+        .then((value) {
       var data = value.docs.map((e) => Animal.fromMap(e.data())).toList();
       setState(() {
         animals = data;
+        print('getAnimals: $animals');
       });
     });
   }
@@ -39,11 +47,13 @@ class MyAnimalsState extends State<MyAnimals> {
     print('Auth initialized');
   }
 
-  void initDatabase() {
+  void initDatabase() async {
     var db = FirebaseFirestore.instance;
     setState(() {
       _database = db;
     });
+    await getAnimals();
+    await getAnimalsCards();
     print('Database initialized');
   }
 
@@ -52,7 +62,7 @@ class MyAnimalsState extends State<MyAnimals> {
     super.initState();
     initAuth();
     initDatabase();
-    getAnimals();
+    // getAnimals();
   }
 
   @override
@@ -61,23 +71,35 @@ class MyAnimalsState extends State<MyAnimals> {
       drawer: AppDrawer(),
       appBar: AppBar(
         title: Text('Meus animais'),
-        actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
-        ],
+        backgroundColor: const Color.fromARGB(255, 207, 233, 229),
+        shadowColor: Colors.transparent,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+            statusBarColor: Color.fromARGB(255, 136, 201, 191)),
+        foregroundColor: const Color.fromARGB(255, 67, 67, 67),
+        titleTextStyle: const TextStyle(
+          fontFamily: 'Roboto Medium',
+          fontSize: 20,
+          color: Color.fromARGB(255, 67, 67, 67),
+        ),
       ),
       body: Center(
-          child: SingleChildScrollView(child: Column(children: getAnimalsCards()))
-      ),
+          child: SingleChildScrollView(
+              child: Column(children: animalCards ?? []))),
     );
   }
 
-  List<Widget> getAnimalsCards() {
+  Future<void> getAnimalsCards() async {
     List<Widget> cards = <AnimalCard>[];
+    var ownerData =
+        await _database.collection("users").doc(_auth.currentUser!.uid).get();
+    var owner = User.fromMap(ownerData.data());
     for (var i = 0; i < animals.length; i++) {
-      cards.add(AnimalCard(
-          animal: animals[i]
-      ));
+      cards.add(AnimalCard(animal: animals[i], owner: owner,));
     }
-    return cards;
+
+    setState(() {
+      animalCards = cards;
+      print("animalsCards: $animalCards");
+    });
   }
 }

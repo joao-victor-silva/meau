@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:meau/pages/Drawer.dart';
+import 'package:flutter/services.dart';
+import 'package:meau/pages/drawer.dart';
 import 'package:meau/pages/notification_card.dart';
 
 class Notifications extends StatefulWidget {
@@ -59,9 +60,16 @@ class NotificationsState extends State<Notifications> {
       drawer: AppDrawer(),
       appBar: AppBar(
         title: Text('Notificações'),
-        actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
-        ],
+        backgroundColor: const Color.fromARGB(255, 207, 233, 229),
+        shadowColor: Colors.transparent,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+            statusBarColor: Color.fromARGB(255, 136, 201, 191)),
+        foregroundColor: const Color.fromARGB(255, 67, 67, 67),
+        titleTextStyle: const TextStyle(
+          fontFamily: 'Roboto Medium',
+          fontSize: 20,
+          color: Color.fromARGB(255, 67, 67, 67),
+        ),
       ),
       body: Center(
         child: SingleChildScrollView(child: Column(children: notifications))

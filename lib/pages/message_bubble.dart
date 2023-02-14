@@ -19,9 +19,8 @@ class MessageBubbleState extends State<MessageBubble> {
   late FirebaseFirestore _database;
 
   static const styleSomebody = BubbleStyle(
-    nip: BubbleNip.leftCenter,
+    nip: BubbleNip.leftTop,
     color: Colors.white,
-    borderColor: Colors.blue,
     borderWidth: 1,
     elevation: 4,
     margin: BubbleEdges.only(top: 8, right: 50),
@@ -29,9 +28,8 @@ class MessageBubbleState extends State<MessageBubble> {
   );
 
   static const styleMe = BubbleStyle(
-    nip: BubbleNip.rightCenter,
+    nip: BubbleNip.rightTop,
     color: Color.fromARGB(255, 225, 255, 199),
-    borderColor: Colors.blue,
     borderWidth: 1,
     elevation: 4,
     margin: BubbleEdges.only(top: 8, left: 50),
@@ -64,8 +62,28 @@ class MessageBubbleState extends State<MessageBubble> {
   @override
   Widget build(BuildContext context) {
     if (widget.message['senderId'] == _auth.currentUser!.uid) {
-      return Bubble(style: styleMe, child: Text(widget.message['content']),);
+      return Bubble(
+        style: styleMe,
+        child: Text(
+          widget.message['content'],
+          style: TextStyle(
+            fontSize: 14.0,
+            fontFamily: "Roboto Regular",
+            // color: Color(0xffbdbdbd),
+          ),
+        ),
+      );
     }
-      return Bubble(style: styleSomebody, child: Text(widget.message['content']),);
+    return Bubble(
+      style: styleSomebody,
+      child: Text(
+        widget.message['content'],
+        style: TextStyle(
+          fontSize: 14.0,
+          fontFamily: "Roboto Regular",
+          // color: Color(0xffbdbdbd),
+        ),
+      ),
+    );
   }
 }

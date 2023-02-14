@@ -4,7 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:meau/local_user.dart';
-import 'package:meau/pages/Drawer.dart';
+import 'package:meau/pages/drawer.dart';
 import 'package:meau/pages/all_animals_page.dart';
 import 'package:meau/pages/animal_signup.dart';
 import 'package:meau/pages/introduction_page.dart';

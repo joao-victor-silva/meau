@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:meau/pages/Drawer.dart';
+import 'package:meau/pages/drawer.dart';
 import 'package:meau/pages/local_user_signin.dart';
 import 'package:meau/pages/unauthenticated_page.dart';
 
@@ -81,27 +81,27 @@ class _IntroductionPageState extends State<IntroductionPage> {
             const SizedBox(
               height: 12,
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, UnauthenticatedPage.id);
-              },
-              style: const ButtonStyle(
-                  backgroundColor: MaterialStatePropertyAll(
-                      Color.fromARGB(255, 255, 211, 88)),
-                  foregroundColor:
-                      MaterialStatePropertyAll(Color.fromARGB(255, 67, 67, 67)),
-                  fixedSize: MaterialStatePropertyAll(Size(232, 40)),
-                  textStyle: MaterialStatePropertyAll(
-                    TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'Roboto',
-                    ),
-                  )),
-              child: const Text('AJUDAR'),
-            ),
-            const SizedBox(
-              height: 12,
-            ),
+            // TextButton(
+            //   onPressed: () {
+            //     Navigator.pushNamed(context, UnauthenticatedPage.id);
+            //   },
+            //   style: const ButtonStyle(
+            //       backgroundColor: MaterialStatePropertyAll(
+            //           Color.fromARGB(255, 255, 211, 88)),
+            //       foregroundColor:
+            //           MaterialStatePropertyAll(Color.fromARGB(255, 67, 67, 67)),
+            //       fixedSize: MaterialStatePropertyAll(Size(232, 40)),
+            //       textStyle: MaterialStatePropertyAll(
+            //         TextStyle(
+            //           fontSize: 12,
+            //           fontFamily: 'Roboto',
+            //         ),
+            //       )),
+            //   child: const Text('AJUDAR'),
+            // ),
+            // const SizedBox(
+            //   height: 12,
+            // ),
             TextButton(
               onPressed: () {
                 Navigator.pushNamed(context, UnauthenticatedPage.id);
